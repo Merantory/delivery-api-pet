@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7
+      author: merantory
+      changes:
+        - tagDatabase:
+            tag: orderTableTag
+        - sqlFile:
+            dbms: "postgresql"
+            relativeToChangelogFile: true
+            path: sql/create_order_table.sql
+
+      rollback:
+        - sqlFile:
+            dbms: "postgresql"
+            relativeToChangelogFile: true
+            path: sql/rollback_order_table.sql

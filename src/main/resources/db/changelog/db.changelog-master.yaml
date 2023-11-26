@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: merantory
+      changes:
+        - tagDatabase:
+            tag: emptyDatabaseTag
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/person_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/category_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/product_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/restaurant_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/product_restaurant_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/order_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/order_product_table.yaml
