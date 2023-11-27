@@ -1,4 +1,4 @@
-package com.merantory.exception;
+package com.merantory.dostavim.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

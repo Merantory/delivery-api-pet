@@ -1,8 +1,8 @@
-package com.merantory.exception;
+package com.merantory.dostavim.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class IllegalOffsetArgumentException extends IllegalArgumentException {
+public class IllegalLimitArgumentException extends IllegalArgumentException {
 }
