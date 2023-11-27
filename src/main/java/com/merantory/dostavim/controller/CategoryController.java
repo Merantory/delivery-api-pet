@@ -4,8 +4,8 @@ import com.merantory.dostavim.dto.impl.category.CreateCategoryDto;
 import com.merantory.dostavim.dto.mappers.category.CategoryMapper;
 import com.merantory.dostavim.model.Category;
 import com.merantory.dostavim.service.CategoryService;
-import com.merantory.exception.IllegalLimitArgumentException;
-import com.merantory.exception.IllegalOffsetArgumentException;
+import com.merantory.dostavim.exception.IllegalLimitArgumentException;
+import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +39,7 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<HttpStatus> createCategory(@RequestBody CreateCategoryDto createCategoryDto) {
+    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryDto createCategoryDto) {
         Category category = categoryMapper.toCategory(createCategoryDto);
         categoryService.create(category);
         return new ResponseEntity<>(HttpStatus.CREATED);
