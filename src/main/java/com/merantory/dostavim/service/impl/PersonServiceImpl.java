@@ -44,12 +44,13 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public Optional<Person> getPerson(Long id) {
-        return Optional.empty();
+        Optional<Person> personOptional = personRepository.getPerson(id);
+        return personOptional;
     }
 
     @Override
     public List<Person> getPersons(Integer limit, Integer offset) {
-        return null;
+        return personRepository.getPersons(limit, offset);
     }
 
     @Override
@@ -62,12 +63,12 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public Boolean update(Person person) {
-        return null;
+        return personRepository.updatePersonInfo(person);
     }
 
     @Override
     @Transactional
     public Boolean delete(Long id) {
-        return null;
+        return personRepository.delete(id);
     }
 }

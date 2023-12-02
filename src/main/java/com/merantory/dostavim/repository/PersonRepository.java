@@ -7,6 +7,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -29,6 +30,23 @@ public class PersonRepository {
         return personOptional;
     }
 
+    public Optional<Person> getPerson(Long id) {
+        String sqlQuery = "SELECT * FROM person WHERE id=?";
+        Optional<Person> personOptional;
+        try {
+            personOptional = Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, new PersonRowMapper(), id));
+        } catch (EmptyResultDataAccessException emptyException) {
+            personOptional = Optional.empty();
+        }
+        return personOptional;
+    }
+
+    public List<Person> getPersons(Integer limit, Integer offset) {
+        String sqlQuery = "SELECT * FROM person LIMIT ? OFFSET ?";
+        List<Person> personList = jdbcTemplate.query(sqlQuery, new PersonRowMapper(), limit, offset);
+        return personList;
+    }
+
     public Boolean save(Person person) {
         String sqlQuery = "INSERT INTO person(email, password, name, phone_number, address, role) VALUES(?, ?, ?, ?, ?, ?)";
         Boolean isSaved = (jdbcTemplate.update(sqlQuery, person.getEmail(), person.getPassword(),
@@ -36,4 +54,15 @@ public class PersonRepository {
         return isSaved;
     }
 
+    public Boolean updatePersonInfo(Person person) {
+        String sqlQuery = "UPDATE person SET name=?, address=?";
+        Boolean isUpdated = (jdbcTemplate.update(sqlQuery, person.getName(), person.getAddress())) != 0;
+        return isUpdated;
+    }
+
+    public Boolean delete(Long id) {
+        String sqlQuery = "DELETE FROM person WHERE id=?";
+        Boolean isDeleted = (jdbcTemplate.update(sqlQuery, id)) != 0;
+        return isDeleted;
+    }
 }
