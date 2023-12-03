@@ -28,7 +28,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public Person loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Person> personOptional = personRepository.getByEmail(username);
         if (personOptional.isEmpty()) {
             throw new BadCredentialsException("User with this email not found");
