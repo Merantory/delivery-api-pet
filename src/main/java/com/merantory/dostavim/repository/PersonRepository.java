@@ -55,8 +55,8 @@ public class PersonRepository {
     }
 
     public Boolean updatePersonInfo(Person person) {
-        String sqlQuery = "UPDATE person SET name=?, address=?";
-        Boolean isUpdated = (jdbcTemplate.update(sqlQuery, person.getName(), person.getAddress())) != 0;
+        String sqlQuery = "UPDATE person SET name=?, address=? WHERE id=?";
+        Boolean isUpdated = (jdbcTemplate.update(sqlQuery, person.getName(), person.getAddress(), person.getId())) != 0;
         return isUpdated;
     }
 
