@@ -1,6 +1,7 @@
 package com.merantory.dostavim.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.service.PersonService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -39,12 +40,12 @@ public class JwtFilter extends OncePerRequestFilter {
                         "Invalid JWT token in authorization bearer header");
             } else {
                 try {
-                    String userEmail = jwtUtil.validateTokenAndRetrieveClaim(jwtToken);
-                    UserDetails userDetails = personService.loadUserByUsername(userEmail);
+                    String personEmail = jwtUtil.validateTokenAndRetrieveClaim(jwtToken);
+                    Person personDetails = (Person) personService.loadUserByUsername(personEmail);
                     UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(userDetails,
-                                    userDetails.getPassword(),
-                                    userDetails.getAuthorities());
+                            new UsernamePasswordAuthenticationToken(personDetails,
+                                    personDetails.getPassword(),
+                                    personDetails.getAuthorities());
 
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
