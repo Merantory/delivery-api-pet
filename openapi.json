@@ -1,0 +1,496 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Dostavim",
+    "version": "0.1"
+  },
+  "paths": {
+    "/orders": {
+      "get": {
+        "tags": [
+          "order-controller"
+        ],
+        "operationId": "getOrders",
+        "parameters": [
+            {
+              "name": "limit",
+              "in": "query",
+              "description": "Максимальное количество заказов в выдаче. Если параметр не передан, то значение по умолчанию равно 1.",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "example": 10
+            },
+            {
+              "name": "offset",
+              "in": "query",
+              "description": "Количество заказов, которое нужно пропустить для отображения текущей страницы. Если параметр не передан, то значение по умолчанию равно 0.",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "example": 0
+            },
+            {
+              "name": "detailed",
+              "in": "query",
+              "description": "Необходимость в передаче списка продуктов заказа. Если параметр не передан, то значение по умолчанию равно false",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              },
+              "example": true
+            }
+          ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {"$ref": "#/components/schemas/OrderDto"},
+                        {"$ref": "#/components/schemas/DetailedOrderDto"}
+                        ]
+                    }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-controller"
+        ],
+        "operationId": "createOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "tags": [
+          "order-controller"
+        ],
+        "operationId": "getOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Order identifier",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetailedOrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateOrderDto": {
+        "required": [
+          "restaurant_id",
+          "products"
+        ],
+        "type": "object",
+        "properties": {
+          "restaurant_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateOrderProductDto"
+            }
+          }
+        }
+      },
+      "CreateOrderRequest": {
+        "required": [
+          "orders"
+        ],
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateOrderDto"
+            }
+          }
+        }
+      },
+      "OrderDto": {
+        "required": [
+          "id",
+          "weight",
+          "cost",
+          "order_date",
+          "order_status",
+          "restaurant_id",
+          "person_id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          },
+          "cost": {
+            "type": "number",
+            "format": "double"
+          },
+          "order_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "order_status": {
+            "type": "string"
+          },
+          "restaurant_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "person_id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CreateOrderProductDto": {
+        "required": [
+          "product_id",
+          "name",
+          "price",
+          "weight",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DetailedOrderDto": {
+        "required": [
+          "id",
+          "weight",
+          "cost",
+          "order_date",
+          "order_status",
+          "restaurant_id",
+          "person_id",
+          "products"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          },
+          "cost": {
+            "type": "number",
+            "format": "double"
+          },
+          "order_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "order_status": {
+            "type": "string"
+          },
+          "restaurant_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "person_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderProductDto"
+            }
+          }
+        }
+      },
+      "OrderProductDto": {
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/OrderDto"
+          },
+          "product": {
+            "$ref": "#/components/schemas/ProductDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CategoryDto": {
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateCategoryDto": {
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductDto": {
+        "required": [
+          "id",
+          "name",
+          "price",
+          "weight",
+          "description",
+          "category"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CreateProductDto": {
+        "required": [
+          "name",
+          "price",
+          "weight",
+          "description",
+          "category"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CreateCategoryDto"
+          }
+        }
+      },
+      "AddProductToRestaurantDto": {
+        "required": [
+          "product_id",
+          "restaurant_id",
+          "count"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "restaurant_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CreateRestaurantDto": {
+        "required": [
+          "name",
+          "address",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "RestaurantDto": {
+        "required": [
+          "id",
+          "name",
+          "address",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "BadRequestResponse": {
+        "type": "object"
+      },
+      "NotFoundResponse": {
+        "type": "object"
+      }
+    }
+  }
+}
