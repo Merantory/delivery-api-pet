@@ -15,4 +15,5 @@ public class Product {
     private String description;
     private Category category;
     private Set<OrderProduct> orderProductSet;
+    private Set<ProductRestaurant> productRestaurantSet;
 }

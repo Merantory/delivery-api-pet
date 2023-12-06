@@ -1,5 +1,6 @@
 package com.merantory.dostavim.service.impl;
 
+import com.merantory.dostavim.model.ProductRestaurant;
 import com.merantory.dostavim.model.Restaurant;
 import com.merantory.dostavim.repository.RestaurantRepository;
 import com.merantory.dostavim.service.RestaurantService;
@@ -29,6 +30,12 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public List<Restaurant> getRestaurants(Integer limit, Integer offset) {
         return restaurantRepository.getRestaurants(limit, offset);
+    }
+
+    @Override
+    @Transactional
+    public Boolean addOrUpdateProduct(ProductRestaurant productRestaurant) {
+        return restaurantRepository.addOrUpdateProduct(productRestaurant);
     }
 
     @Override

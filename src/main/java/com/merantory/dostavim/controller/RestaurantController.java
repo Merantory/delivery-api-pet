@@ -1,10 +1,13 @@
 package com.merantory.dostavim.controller;
 
+import com.merantory.dostavim.dto.impl.productRestaurant.AddProductToRestaurantDto;
 import com.merantory.dostavim.dto.impl.restaurant.CreateRestaurantDto;
+import com.merantory.dostavim.dto.mappers.productRestaurant.ProductRestaurantMapper;
 import com.merantory.dostavim.dto.mappers.restaurant.RestaurantMapper;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
 import com.merantory.dostavim.exception.RestaurantNotFoundException;
+import com.merantory.dostavim.model.ProductRestaurant;
 import com.merantory.dostavim.model.Restaurant;
 import com.merantory.dostavim.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +22,17 @@ import java.util.Optional;
 public class RestaurantController {
     private final RestaurantService restaurantService;
     private final RestaurantMapper restaurantMapper;
+    private final ProductRestaurantMapper productRestaurantMapper;
 
     @Autowired
-    public RestaurantController(RestaurantService restaurantService, RestaurantMapper restaurantMapper) {
+    public RestaurantController(RestaurantService restaurantService, RestaurantMapper restaurantMapper,
+                                ProductRestaurantMapper productRestaurantMapper) {
         this.restaurantService = restaurantService;
         this.restaurantMapper = restaurantMapper;
+        this.productRestaurantMapper = productRestaurantMapper;
     }
 
+    @GetMapping("/{id}")
     public ResponseEntity<?> getRestaurant(@PathVariable Long id) {
         Optional<Restaurant> restaurantOptional = restaurantService.getRestaurant(id);
         if (restaurantOptional.isEmpty()) throw new RestaurantNotFoundException();
@@ -45,6 +52,13 @@ public class RestaurantController {
                 .map(restaurantMapper::toRestaurantDto).toList(), HttpStatus.OK);
     }
 
+    @PostMapping("/add_product")
+    public ResponseEntity<?> addOrUpdateProducts(@RequestBody AddProductToRestaurantDto addProductToRestaurantDto) {
+        ProductRestaurant productRestaurant = productRestaurantMapper.toProductRestaurant(addProductToRestaurantDto);
+        Boolean isApplied = restaurantService.addOrUpdateProduct(productRestaurant);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<?> createRestaurant(@RequestBody CreateRestaurantDto createRestaurantDto) {
         Restaurant restaurant = restaurantMapper.toRestaurant(createRestaurantDto);
@@ -53,7 +67,8 @@ public class RestaurantController {
     }
 
     @PatchMapping("/{id}/edit")
-    public ResponseEntity<?> updateRestaurant(@PathVariable("id") Long id, @RequestBody CreateRestaurantDto createRestaurantDto) {
+    public ResponseEntity<?> updateRestaurant(@PathVariable("id") Long id,
+                                              @RequestBody CreateRestaurantDto createRestaurantDto) {
         Restaurant restaurant = restaurantMapper.toRestaurant(createRestaurantDto);
         restaurant.setId(id);
         Boolean isUpdated = restaurantService.update(restaurant);

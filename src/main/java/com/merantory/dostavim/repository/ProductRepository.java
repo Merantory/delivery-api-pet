@@ -39,6 +39,16 @@ public class ProductRepository {
         return productList;
     }
 
+    public List<Product> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {
+        String sqlQuery = "SELECT " +
+                "id, name, price, weight, description, category, product_count " +
+                "FROM (SELECT product_id, count AS product_count FROM product_restaurant " +
+                    "WHERE restaurant_id=? LIMIT ? OFFSET ?) AS pr " +
+                "JOIN product AS p ON p.id = pr.product_id";
+        List<Product> productList = jdbcTemplate.query(sqlQuery, new ProductRowMapper(), restaurantId, limit, offset);
+        return productList;
+    }
+
     public Boolean save(Product product) {
         String sqlQuery = "INSERT INTO product(name, price, weight, description, category) VALUES(?, ?, ?, ?, ?)";
         Boolean isSaved = false;

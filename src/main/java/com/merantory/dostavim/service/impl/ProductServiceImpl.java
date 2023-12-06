@@ -32,6 +32,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {
+        return productRepository.getRestaurantProducts(restaurantId, limit, offset);
+    }
+
+    @Override
     @Transactional
     public Boolean create(Product product) {
         return productRepository.save(product);

@@ -4,8 +4,12 @@ import com.merantory.dostavim.dto.impl.product.CreateProductDto;
 import com.merantory.dostavim.dto.impl.product.ProductDto;
 import com.merantory.dostavim.dto.mappers.category.CategoryMapper;
 import com.merantory.dostavim.model.Product;
+import com.merantory.dostavim.model.ProductRestaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
+import java.util.Set;
 
 @Component
 public class ProductMapper {
@@ -35,6 +39,14 @@ public class ProductMapper {
         productDto.setWeight(product.getWeight());
         productDto.setDescription(product.getDescription());
         productDto.setCategory(categoryMapper.toCategoryDto(product.getCategory()));
+        if (product.getProductRestaurantSet() != null && !product.getProductRestaurantSet().isEmpty()) {
+            Set<ProductRestaurant> productRestaurantSet = product.getProductRestaurantSet();
+            Integer count = productRestaurantSet.stream()
+                    .filter(pr -> Objects.nonNull(pr.getCount()))
+                    .mapToInt(ProductRestaurant::getCount)
+                    .sum();
+            productDto.setCount(count);
+        }
 
         return productDto;
     }

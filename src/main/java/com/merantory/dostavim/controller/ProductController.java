@@ -4,6 +4,7 @@ import com.merantory.dostavim.dto.impl.product.CreateProductDto;
 import com.merantory.dostavim.dto.mappers.product.ProductMapper;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
+import com.merantory.dostavim.exception.IllegalRestaurantIdException;
 import com.merantory.dostavim.exception.ProductNotFoundException;
 import com.merantory.dostavim.model.Product;
 import com.merantory.dostavim.service.ProductService;
@@ -34,7 +35,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getProducts(@RequestParam(value = "limit") Optional<Integer> limitOptional,
+    public ResponseEntity<?> getProducts(@RequestParam(value = "restaurant_id") Optional<Long> restaurantIdOptional,
+                                         @RequestParam(value = "limit") Optional<Integer> limitOptional,
                                          @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
@@ -42,7 +44,16 @@ public class ProductController {
         if (limit < 1) throw new IllegalLimitArgumentException();
         if (offset < 0) throw new IllegalOffsetArgumentException();
 
+        if (restaurantIdOptional.isPresent()) return getRestaurantProducts(restaurantIdOptional.get(), limit, offset);
+
         return new ResponseEntity<>(productService.getProducts(limit, offset).stream()
+                .map(productMapper::toProductDto).toList(), HttpStatus.OK);
+    }
+
+    private ResponseEntity<?> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {
+        if (restaurantId < 1) throw new IllegalRestaurantIdException();
+
+        return new ResponseEntity<>(productService.getRestaurantProducts(restaurantId, limit, offset).stream()
                 .map(productMapper::toProductDto).toList(), HttpStatus.OK);
     }
 
