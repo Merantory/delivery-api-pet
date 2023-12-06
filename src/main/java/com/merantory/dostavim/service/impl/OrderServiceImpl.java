@@ -1,10 +1,13 @@
 package com.merantory.dostavim.service.impl;
 
+import com.merantory.dostavim.exception.OrderCreationFailed;
 import com.merantory.dostavim.model.Order;
 import com.merantory.dostavim.model.OrderProduct;
 import com.merantory.dostavim.repository.OrderRepository;
+import com.merantory.dostavim.repository.RestaurantRepository;
 import com.merantory.dostavim.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +19,12 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
+    private final RestaurantRepository restaurantRepository;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, RestaurantRepository restaurantRepository) {
         this.orderRepository = orderRepository;
+        this.restaurantRepository = restaurantRepository;
     }
 
     @Override
@@ -51,7 +56,11 @@ public class OrderServiceImpl implements OrderService {
         order.setCost(cost);
         order.setOrderDate(Instant.now());
         order.setOrderStatus("In process");
-        return orderRepository.save(order);
+        try {
+            return orderRepository.save(order) && restaurantRepository.reduceProducts(order.getRestaurant().getId(), order.getOrderProductSet());
+        } catch (DataAccessException exception) {
+            throw new OrderCreationFailed();
+        }
     }
 
     @Override
