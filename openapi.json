@@ -973,7 +973,7 @@
     "/products": {
       "get": {
         "tags": [
-          "products-controller"
+          "product-controller"
         ],
         "description": "Возвращает массив всех товаров в системе",
         "operationId": "getProducts",
@@ -1040,7 +1040,7 @@
       },
       "post": {
         "tags": [
-          "products-controller"
+          "product-controller"
         ],
         "description": "Создание товара в системе",
         "operationId": "createProducts",
@@ -1101,10 +1101,10 @@
     "/products/{id}": {
       "get": {
         "tags": [
-          "products-controller"
+          "product-controller"
         ],
         "description": "Возвращает товар, соответствующий идентификатору",
-        "operationId": "getProducts",
+        "operationId": "getProduct",
         "parameters": [
           {
             "name": "id",
@@ -1165,12 +1165,12 @@
           "product-controller"
         ],
         "description": "Удалят продукт, соответствующий идентификатору из системы",
-        "operationId": "deleteProducts",
+        "operationId": "deleteProduct",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "Products identifier",
+            "description": "Product identifier",
             "required": true,
             "schema": {
               "type": "integer",
@@ -1235,7 +1235,7 @@
     "/products/{id}/edit": {
       "patch": {
         "tags": [
-          "products-controller"
+          "product-controller"
         ],
         "description": "Обновляет информация о товаре, с соответствующим идентификатором",
         "operationId": "updateProduct",
