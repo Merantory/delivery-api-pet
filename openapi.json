@@ -1162,7 +1162,7 @@
       },
       "delete": {
         "tags": [
-          "restaurant-controller"
+          "product-controller"
         ],
         "description": "Удалят продукт, соответствующий идентификатору из системы",
         "operationId": "deleteProducts",
