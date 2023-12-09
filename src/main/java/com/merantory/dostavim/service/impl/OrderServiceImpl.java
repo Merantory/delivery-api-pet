@@ -11,6 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -45,19 +46,24 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Boolean create(Order order) {
-        Double weight = 0D;
-        Double cost = 0D;
+    public Order create(Order order) {
+        BigDecimal weight = BigDecimal.ZERO;
+        BigDecimal cost = BigDecimal.ZERO;
         for (OrderProduct orderProduct : order.getOrderProductSet()) {
-            weight += orderProduct.getProduct().getWeight() * orderProduct.getCount();
-            cost += orderProduct.getProduct().getPrice() * orderProduct.getCount();
+            BigDecimal productWeight = BigDecimal.valueOf(orderProduct.getProduct().getWeight());
+            BigDecimal productPrice = BigDecimal.valueOf(orderProduct.getProduct().getPrice());
+            BigDecimal count = BigDecimal.valueOf(orderProduct.getCount());
+            weight = weight.add(productWeight.multiply(count));
+            cost = cost.add(productPrice.multiply(count));
         }
-        order.setWeight(weight);
-        order.setCost(cost);
+        order.setWeight(weight.doubleValue());
+        order.setCost(cost.doubleValue());
         order.setOrderDate(Instant.now());
         order.setOrderStatus("In process");
         try {
-            return orderRepository.save(order) && restaurantRepository.reduceProducts(order.getRestaurant().getId(), order.getOrderProductSet());
+            orderRepository.save(order);
+            restaurantRepository.reduceProducts(order.getRestaurant().getId(), order.getOrderProductSet());
+            return order;
         } catch (DataAccessException exception) {
             throw new OrderCreationFailed();
         }

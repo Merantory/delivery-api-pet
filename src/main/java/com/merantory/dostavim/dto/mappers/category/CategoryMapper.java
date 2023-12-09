@@ -15,6 +15,10 @@ public class CategoryMapper {
     }
 
     public CategoryDto toCategoryDto(Category category) {
-        return new CategoryDto(category.getName());
+        CategoryDto categoryDto = new CategoryDto();
+        if (category != null && category.getName() != null) {
+            categoryDto.setName(category.getName());
+        }
+        return categoryDto;
     }
 }

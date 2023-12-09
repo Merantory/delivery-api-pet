@@ -78,9 +78,10 @@ public class OrderRepository {
         return orderList;
     }
 
-    public Boolean save(Order order) {
-        Boolean isSaved = saveOrder(order) && saveOrderProducts(order);
-        return isSaved;
+    public Order save(Order order) {
+        saveOrder(order);
+        saveOrderProducts(order);
+        return order;
     }
 
     private Boolean saveOrder(Order order) {

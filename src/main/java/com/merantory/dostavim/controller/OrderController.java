@@ -1,7 +1,9 @@
 package com.merantory.dostavim.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.merantory.dostavim.dto.impl.order.CreateOrderDto;
 import com.merantory.dostavim.dto.mappers.order.OrderMapper;
+import com.merantory.dostavim.dto.markerInterfaces.Views;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
 import com.merantory.dostavim.exception.OrderNotFoundException;
@@ -69,12 +71,13 @@ public class OrderController {
     }
 
     @PostMapping
+    @JsonView(Views.Public.class)
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderDto createOrderDto) {
         Person creator = getAuthenticationPerson();
         Order order = orderMapper.toOrder(createOrderDto);
         order.setPerson(creator);
-        Boolean isCreated = orderService.create(order);
-        return (isCreated) ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        Order createdOrder = orderService.create(order);
+        return new ResponseEntity<>(orderMapper.toDetailedOrderDto(createdOrder), HttpStatus.CREATED);
     }
 
     private Person getAuthenticationPerson() {

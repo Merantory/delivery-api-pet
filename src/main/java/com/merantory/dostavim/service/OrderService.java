@@ -9,7 +9,7 @@ public interface OrderService {
     Optional<Order> getOrder(Long id);
     List<Order> getOrders(Integer limit, Integer offset, Boolean detailed);
     List<Order> getPersonOrders(Long ownerPersonId, Integer limit, Integer offset, Boolean detailed);
-    Boolean create(Order order);
+    Order create(Order order);
     Boolean update(Order order);
     Boolean delete(Long id);
 }
