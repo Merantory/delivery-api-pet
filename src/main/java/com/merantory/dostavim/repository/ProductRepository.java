@@ -69,8 +69,11 @@ public class ProductRepository {
     }
 
     public Boolean delete(Long id) {
-        String sqlQuery = "DELETE FROM product WHERE id=?";
-        Boolean isDeleted = (jdbcTemplate.update(sqlQuery, id)) != 0;
+        String sqlQuery = "DELETE FROM \"order\" WHERE id IN (SELECT order_id FROM order_product WHERE product_id=?); " +
+                "DELETE FROM order_product WHERE product_id=?; " +
+                "DELETE FROM product_restaurant WHERE product_id=?; " +
+                "DELETE FROM product WHERE id=?";
+        Boolean isDeleted = (jdbcTemplate.update(sqlQuery, id, id, id, id)) != 0;
         return isDeleted;
     }
 }
