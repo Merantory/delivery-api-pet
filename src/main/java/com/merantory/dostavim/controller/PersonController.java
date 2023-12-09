@@ -2,7 +2,7 @@ package com.merantory.dostavim.controller;
 
 import com.merantory.dostavim.dto.impl.person.UpdatePersonInfoDto;
 import com.merantory.dostavim.exception.PersonAuthFailedException;
-import com.merantory.dostavim.exception.PersonNotFoundException;
+import com.merantory.dostavim.exception.PersonUpdateFailedException;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class PersonController {
     private final PersonService personService;
 
@@ -32,7 +32,7 @@ public class PersonController {
         authPerson.setAddress(updatePersonInfoDto.getAddress());
         System.out.println(authPerson.getId());
         Boolean isUpdated = personService.update(authPerson);
-        if (!isUpdated) throw new PersonNotFoundException();
+        if (!isUpdated) throw new PersonUpdateFailedException();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
