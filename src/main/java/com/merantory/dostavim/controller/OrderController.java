@@ -36,7 +36,7 @@ public class OrderController {
     public ResponseEntity<?> getOrder(@PathVariable Long id) {
         Optional<Order> orderOptional = orderService.getOrder(id);
         if (orderOptional.isEmpty()) throw new OrderNotFoundException();
-        return new ResponseEntity<>(orderMapper.toOrderDto(orderOptional.get()), HttpStatus.OK);
+        return new ResponseEntity<>(orderMapper.toDetailedOrderDto(orderOptional.get()), HttpStatus.OK);
     }
 
     @GetMapping("/all")

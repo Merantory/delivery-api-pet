@@ -27,10 +27,19 @@ public class OrderRepository {
     }
 
     public Optional<Order> getOrder(Long id) {
-        String sqlQuery = "SELECT * FROM \"order\" WHERE id=?";
+        String sqlQuery = "SELECT " +
+                "order_id, o.weight as order_weight, cost as order_cost, " +
+                "order_date, order_status, restaurant_id, person_id, product_id, " +
+                "count as product_count, p.weight as product_weight, price as product_price, " +
+                "name as product_name, description as product_description, category as product_category " +
+                "FROM (SELECT * FROM \"order\" WHERE id=?) as o " +
+                "JOIN order_product op ON o.id = op.order_id " +
+                "JOIN product p on p.id = op.product_id";
         Optional<Order> orderOptional;
         try {
-            orderOptional = Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, new OrderRowMapper(), id));
+           orderOptional = jdbcTemplate.query(sqlQuery, new OrderResultSetExtractor(), id)
+                   .stream().map(Optional::ofNullable)
+                   .findFirst().orElse(null);
         } catch (EmptyResultDataAccessException emptyException) {
             orderOptional = Optional.empty();
         }
