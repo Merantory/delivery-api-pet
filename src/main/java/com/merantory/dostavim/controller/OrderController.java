@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.merantory.dostavim.dto.impl.order.CreateOrderDto;
 import com.merantory.dostavim.dto.mappers.order.OrderMapper;
 import com.merantory.dostavim.dto.markerInterfaces.Views;
-import com.merantory.dostavim.exception.IllegalLimitArgumentException;
-import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
-import com.merantory.dostavim.exception.OrderNotFoundException;
-import com.merantory.dostavim.exception.PersonAuthFailedException;
+import com.merantory.dostavim.exception.*;
 import com.merantory.dostavim.model.Order;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.service.OrderService;
@@ -34,8 +31,17 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrder(@PathVariable Long id) {
+        Person person = getAuthenticationPerson();
+
         Optional<Order> orderOptional = orderService.getOrder(id);
-        if (orderOptional.isEmpty()) throw new OrderNotFoundException();
+        if (orderOptional.isEmpty()) {
+            throw new OrderNotFoundException();
+        }
+        Order order = orderOptional.get();
+        if (!person.getRole().equals("ROLE_ADMIN") && !order.getPerson().getId().equals(person.getId())) {
+            throw new ForbiddenException();
+        }
+
         return new ResponseEntity<>(orderMapper.toOrderDto(orderOptional.get()), HttpStatus.OK);
     }
 
