@@ -23,6 +23,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +38,7 @@ import java.util.Map;
 )
 @RestController
 @RequestMapping("/sign")
+@Validated
 public class SignController {
     private final AuthenticationManager authenticationManager;
     private final PersonService personService;
@@ -66,7 +68,7 @@ public class SignController {
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @PostMapping("/in")
-    public ResponseEntity<?> signIn(@RequestBody SignInPersonDto signInPersonDto) {
+    public ResponseEntity<?> signIn(@Valid @RequestBody SignInPersonDto signInPersonDto) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(signInPersonDto.getEmail(), signInPersonDto.getPassword());
         try {

@@ -17,11 +17,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +37,7 @@ import java.util.Optional;
 )
 @RestController
 @RequestMapping("/orders")
+@Validated
 public class OrderController {
     private final OrderService orderService;
     private final OrderMapper orderMapper;
@@ -54,7 +58,7 @@ public class OrderController {
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{id}")
-    public ResponseEntity<OrderDto> getOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderDto> getOrder(@PathVariable @Positive Long id) {
         Person person = getAuthenticationPerson();
 
         Optional<Order> orderOptional = orderService.getOrder(id);
@@ -158,7 +162,7 @@ public class OrderController {
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
     })
     @PostMapping
-    public ResponseEntity<OrderDto> createOrder(@RequestBody CreateOrderDto createOrderDto) {
+    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody CreateOrderDto createOrderDto) {
         Person creator = getAuthenticationPerson();
         Order order = orderMapper.toOrder(createOrderDto);
         order.setPerson(creator);

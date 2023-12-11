@@ -41,7 +41,7 @@ public class OrderRepository {
         try {
            orderOptional = jdbcTemplate.query(sqlQuery, new OrderResultSetExtractor(), id)
                    .stream().map(Optional::ofNullable)
-                   .findFirst().orElse(null);
+                   .findFirst().orElse(Optional.empty());
         } catch (EmptyResultDataAccessException emptyException) {
             orderOptional = Optional.empty();
         }

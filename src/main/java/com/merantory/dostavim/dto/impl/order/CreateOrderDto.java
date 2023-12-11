@@ -2,6 +2,9 @@ package com.merantory.dostavim.dto.impl.order;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.merantory.dostavim.dto.impl.orderProduct.CreateOrderProductDto;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +16,11 @@ import java.util.Set;
 @NoArgsConstructor
 public class CreateOrderDto {
     @JsonProperty("restaurant_id")
+    @NotEmpty(message = "Значение поля не должно быть пустым")
+    @Positive(message = "Значение поля должно быть положительным")
     private Long restaurantId;
+
     @JsonProperty("products")
-    private Set<CreateOrderProductDto> createOrderProductDtoSet;
+    @NotEmpty(message = "Значение поля не должно быть пустым")
+    private Set<@Valid CreateOrderProductDto> createOrderProductDtoSet;
 }

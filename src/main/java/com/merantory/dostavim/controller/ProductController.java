@@ -19,9 +19,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +37,7 @@ import java.util.Optional;
 )
 @RestController
 @RequestMapping("/products")
+@Validated
 public class ProductController {
     private final ProductService productService;
     private final ProductMapper productMapper;
@@ -54,7 +58,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable("id") Long id) {
+    public ResponseEntity<ProductDto> getProduct(@PathVariable("id") @Positive Long id) {
         Optional<Product> productOptional = productService.getProduct(id);
         if (productOptional.isEmpty()) throw new ProductNotFoundException();
         return new ResponseEntity<>(productMapper.toProductDto(productOptional.get()), HttpStatus.OK);
@@ -118,7 +122,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductDto createProductDto) {
+    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody CreateProductDto createProductDto) {
         Product product = productMapper.toProduct(createProductDto);
         product = productService.create(product);
         ProductDto productDto = productMapper.toProductDto(product);
@@ -137,7 +141,8 @@ public class ProductController {
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @PatchMapping("/{id}/edit")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") Long id, @RequestBody CreateProductDto createProductDto) {
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") @Positive Long id,
+                                                    @Valid @RequestBody CreateProductDto createProductDto) {
         Product product = productMapper.toProduct(createProductDto);
         product.setId(id);
         product = productService.update(product);
@@ -158,7 +163,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<ProductDto> deleteProduct(@PathVariable("id") Long id) {
+    public ResponseEntity<ProductDto> deleteProduct(@PathVariable("id") @Positive Long id) {
         Product deletedProduct = productService.delete(id);
         return new ResponseEntity<>(productMapper.toProductDto(deletedProduct), HttpStatus.OK);
     }
