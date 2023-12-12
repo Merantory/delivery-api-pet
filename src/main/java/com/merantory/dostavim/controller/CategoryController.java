@@ -1,11 +1,23 @@
 package com.merantory.dostavim.controller;
 
+import com.merantory.dostavim.dto.impl.category.CategoryDto;
 import com.merantory.dostavim.dto.impl.category.CreateCategoryDto;
 import com.merantory.dostavim.dto.mappers.category.CategoryMapper;
-import com.merantory.dostavim.model.Category;
-import com.merantory.dostavim.service.CategoryService;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
+import com.merantory.dostavim.model.Category;
+import com.merantory.dostavim.service.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +25,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@Tags(
+        value = {
+                @Tag(name = "category-controller", description = "API для работы с категориями")
+        }
+)
 @RestController
 @RequestMapping("/categories")
 public class CategoryController {
@@ -25,9 +42,29 @@ public class CategoryController {
         this.categoryMapper = categoryMapper;
     }
 
+    @Operation(
+            description = "Возвращает массив всех категорий в системе.",
+            tags = {"get_method_endpoints"},
+            parameters = {
+                    @Parameter(name = "limit", in = ParameterIn.QUERY, description =
+                            "Максимальное количество категорий в выдаче. " +
+                                    "Если параметр не передан, то значение по умолчанию равно 1.",
+                            required = false, style = ParameterStyle.SIMPLE),
+                    @Parameter(name = "offset", in = ParameterIn.QUERY, description =
+                            "Количество категорий, которое нужно пропустить для отображения текущей страницы. " +
+                                    "Если параметр не передан, то значение по умолчанию равно 0.",
+                            required = false, style = ParameterStyle.SIMPLE)
+            }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    content = {@Content(array = @ArraySchema(schema = @Schema(implementation = CategoryDto.class)),
+                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    })
     @GetMapping
     public ResponseEntity<?> getCategories(@RequestParam(value = "limit") Optional<Integer> limitOptional,
-                              @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
+                                           @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
@@ -38,6 +75,18 @@ public class CategoryController {
                 .map(categoryMapper::toCategoryDto), HttpStatus.OK);
     }
 
+    @Operation(
+            description = "Создание категории в системе.",
+            tags = {"post_method_endpoints"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201",
+                    content = {@Content(schema = @Schema(implementation = CategoryDto.class),
+                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+    })
     @PostMapping
     public ResponseEntity<?> createCategory(@RequestBody CreateCategoryDto createCategoryDto) {
         Category category = categoryMapper.toCategory(createCategoryDto);

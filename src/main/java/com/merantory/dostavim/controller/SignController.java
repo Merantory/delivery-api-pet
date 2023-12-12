@@ -8,6 +8,13 @@ import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.security.JwtUtil;
 import com.merantory.dostavim.service.PersonService;
 import com.merantory.dostavim.util.validator.SignUpPersonValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+@Tags(
+        value = {
+                @Tag(name = "sign-controller", description = "API для работы с регистрацией")
+        }
+)
 @RestController
 @RequestMapping("/sign")
 public class SignController {
@@ -42,6 +54,17 @@ public class SignController {
         this.jwtUtil = jwtUtil;
     }
 
+    @Operation(
+            description = "Авторизация пользователя в системе с возвращением JWT токена.",
+            tags = {"post_method_endpoints"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))}),
+            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
+    })
     @PostMapping("/in")
     public ResponseEntity<?> signIn(@RequestBody SignInPersonDto signInPersonDto) {
         UsernamePasswordAuthenticationToken authenticationToken =
@@ -55,6 +78,14 @@ public class SignController {
         return new ResponseEntity<>(Map.of("jwt_token", token), HttpStatus.OK);
     }
 
+    @Operation(
+            description = "Регистрация пользователя в системе с возвращением JWT токена.",
+            tags = {"post_method_endpoints"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))}),
+            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    })
     @PostMapping("/up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpPersonDto signUpPersonDto,
                                                           BindingResult bindingResult) {
