@@ -38,19 +38,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public Boolean create(Product product) {
-        return productRepository.save(product);
+    public Product create(Product product) {
+        product = productRepository.save(product);
+        return product;
     }
 
     @Override
     @Transactional
-    public Boolean update(Product product) {
-        return productRepository.update(product);
+    public Product update(Product product) {
+        product = productRepository.update(product);
+        return product;
     }
 
     @Override
     @Transactional
-    public Boolean delete(Long id) {
-        return productRepository.delete(id);
+    public Product delete(Long id) {
+        Product product = productRepository.delete(id);
+        return product;
     }
 }
