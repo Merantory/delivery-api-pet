@@ -7,5 +7,5 @@ import java.util.List;
 public interface CategoryService {
     List<Category> getCategories(Integer limit, Integer offset);
 
-    void create(Category category);
+    Category create(Category category);
 }

@@ -26,7 +26,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void create(Category category) {
-        categoryRepository.save(category);
+    public Category create(Category category) {
+        category = categoryRepository.save(category);
+        return category;
     }
 }

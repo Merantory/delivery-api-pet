@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Tags(
@@ -57,14 +58,12 @@ public class CategoryController {
             }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(array = @ArraySchema(schema = @Schema(implementation = CategoryDto.class)),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
     })
     @GetMapping
-    public ResponseEntity<?> getCategories(@RequestParam(value = "limit") Optional<Integer> limitOptional,
-                                           @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
+    public ResponseEntity<List<CategoryDto>> getCategories(@RequestParam(value = "limit") Optional<Integer> limitOptional,
+                                                           @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
@@ -72,7 +71,7 @@ public class CategoryController {
         if (offset < 0) throw new IllegalOffsetArgumentException();
 
         return new ResponseEntity<>(categoryService.getCategories(limit, offset).stream()
-                .map(categoryMapper::toCategoryDto), HttpStatus.OK);
+                .map(categoryMapper::toCategoryDto).toList(), HttpStatus.OK);
     }
 
     @Operation(
@@ -88,9 +87,10 @@ public class CategoryController {
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
     @PostMapping
-    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryDto createCategoryDto) {
+    public ResponseEntity<CategoryDto> createCategory(@RequestBody CreateCategoryDto createCategoryDto) {
         Category category = categoryMapper.toCategory(createCategoryDto);
-        categoryService.create(category);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        category = categoryService.create(category);
+        CategoryDto categoryDto = categoryMapper.toCategoryDto(category);
+        return new ResponseEntity<>(categoryDto, HttpStatus.CREATED);
     }
 }
