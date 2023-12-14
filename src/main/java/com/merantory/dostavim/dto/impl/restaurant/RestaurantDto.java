@@ -1,8 +1,15 @@
 package com.merantory.dostavim.dto.impl.restaurant;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.merantory.dostavim.dto.impl.product.ProductDto;
+import com.merantory.dostavim.dto.impl.productRestaurant.ProductRestaurantDto;
+import com.merantory.dostavim.model.ProductRestaurant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -12,4 +19,7 @@ public class RestaurantDto {
     private String name;
     private String address;
     private String description;
+    @JsonProperty("products")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Set<ProductRestaurantDto> productRestaurantDtoSet;
 }
