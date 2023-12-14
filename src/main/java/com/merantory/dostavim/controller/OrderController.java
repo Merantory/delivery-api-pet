@@ -1,11 +1,8 @@
 package com.merantory.dostavim.controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.merantory.dostavim.dto.impl.order.CreateOrderDto;
-import com.merantory.dostavim.dto.impl.order.DetailedOrderDto;
-import com.merantory.dostavim.dto.impl.product.ProductDto;
+import com.merantory.dostavim.dto.impl.order.OrderDto;
 import com.merantory.dostavim.dto.mappers.order.OrderMapper;
-import com.merantory.dostavim.dto.markerInterfaces.Views;
 import com.merantory.dostavim.exception.*;
 import com.merantory.dostavim.model.Order;
 import com.merantory.dostavim.model.Person;
@@ -14,7 +11,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Tags(
@@ -52,14 +49,12 @@ public class OrderController {
             tags = {"get_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(schema = @Schema(implementation = DetailedOrderDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderDto> getOrder(@PathVariable Long id) {
         Person person = getAuthenticationPerson();
 
         Optional<Order> orderOptional = orderService.getOrder(id);
@@ -72,7 +67,7 @@ public class OrderController {
             throw new ForbiddenException();
         }
 
-        return new ResponseEntity<>(orderMapper.toDetailedOrderDto(orderOptional.get()), HttpStatus.OK);
+        return new ResponseEntity<>(orderMapper.toOrderDto(orderOptional.get()), HttpStatus.OK);
     }
 
     @Operation(
@@ -94,17 +89,15 @@ public class OrderController {
             }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(array = @ArraySchema(schema = @Schema(implementation = DetailedOrderDto.class)),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/all")
-    public ResponseEntity<?> getOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
-                                       @RequestParam(value = "offset") Optional<Integer> offsetOptional,
-                                       @RequestParam(value = "detailed") Optional<Boolean> detailedOptional) {
+    public ResponseEntity<List<OrderDto>> getOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
+                                                    @RequestParam(value = "offset") Optional<Integer> offsetOptional,
+                                                    @RequestParam(value = "detailed") Optional<Boolean> detailedOptional) {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
         Boolean detailed = detailedOptional.orElse(false);
@@ -113,7 +106,7 @@ public class OrderController {
         if (offset < 0) throw new IllegalOffsetArgumentException();
 
         return new ResponseEntity<>(orderService.getOrders(limit, offset, detailed).stream()
-                .map((detailed) ? orderMapper::toDetailedOrderDto : orderMapper::toOrderDto).toList(), HttpStatus.OK);
+                .map(orderMapper::toOrderDto).toList(), HttpStatus.OK);
     }
 
     @Operation(
@@ -135,14 +128,12 @@ public class OrderController {
     }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(schema = @Schema(implementation = DetailedOrderDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
     })
     @GetMapping()
-    public ResponseEntity<?> getPersonOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
+    public ResponseEntity<List<OrderDto>> getPersonOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
                                              @RequestParam(value = "offset") Optional<Integer> offsetOptional,
                                              @RequestParam(value = "detailed") Optional<Boolean> detailedOptional) {
         Integer limit = limitOptional.orElse(1);
@@ -154,7 +145,7 @@ public class OrderController {
         Long ordersOwnerId = getAuthenticationPerson().getId();
 
         return new ResponseEntity<>(orderService.getPersonOrders(ordersOwnerId, limit, offset, detailed).stream()
-                .map((detailed) ? orderMapper::toDetailedOrderDto : orderMapper::toOrderDto).toList(), HttpStatus.OK);
+                .map(orderMapper::toOrderDto).toList(), HttpStatus.OK);
     }
 
     @Operation(
@@ -162,20 +153,17 @@ public class OrderController {
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201",
-                    content = {@Content(schema = @Schema(implementation = DetailedOrderDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
     })
     @PostMapping
-    @JsonView(Views.Public.class)
-    public ResponseEntity<?> createOrder(@RequestBody CreateOrderDto createOrderDto) {
+    public ResponseEntity<OrderDto> createOrder(@RequestBody CreateOrderDto createOrderDto) {
         Person creator = getAuthenticationPerson();
         Order order = orderMapper.toOrder(createOrderDto);
         order.setPerson(creator);
         Order createdOrder = orderService.create(order);
-        return new ResponseEntity<>(orderMapper.toDetailedOrderDto(createdOrder), HttpStatus.CREATED);
+        return new ResponseEntity<>(orderMapper.toOrderDto(createdOrder), HttpStatus.CREATED);
     }
 
     private Person getAuthenticationPerson() {

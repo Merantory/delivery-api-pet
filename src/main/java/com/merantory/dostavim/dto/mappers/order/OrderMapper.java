@@ -1,7 +1,6 @@
 package com.merantory.dostavim.dto.mappers.order;
 
 import com.merantory.dostavim.dto.impl.order.CreateOrderDto;
-import com.merantory.dostavim.dto.impl.order.DetailedOrderDto;
 import com.merantory.dostavim.dto.impl.order.OrderDto;
 import com.merantory.dostavim.dto.mappers.orderProduct.OrderProductMapper;
 import com.merantory.dostavim.model.Order;
@@ -20,7 +19,16 @@ public class OrderMapper {
 
     public OrderDto toOrderDto(Order order) {
         OrderDto orderDto = new OrderDto();
-        mapCommonProperties(order, orderDto);
+        orderDto.setId(order.getId());
+        orderDto.setWeight(order.getWeight());
+        orderDto.setCost(order.getCost());
+        orderDto.setOrderDate(order.getOrderDate());
+        orderDto.setOrderStatus(order.getOrderStatus());
+        orderDto.setRestaurantId(order.getRestaurant().getId());
+        orderDto.setPersonId(order.getPerson().getId());
+        if (order.getOrderProductSet() != null) {
+            orderDto.setOrderProductDtoSet(orderProductMapper.toOrderProductDtoSet(order.getOrderProductSet()));
+        }
         return orderDto;
     }
 
@@ -31,22 +39,5 @@ public class OrderMapper {
         order.setRestaurant(restaurant);
         order.setOrderProductSet(orderProductMapper.toOrderProductSet(createOrderDto.getCreateOrderProductDtoSet()));
         return order;
-    }
-
-    public DetailedOrderDto toDetailedOrderDto(Order order) {
-        DetailedOrderDto detailedOrderDto = new DetailedOrderDto();
-        mapCommonProperties(order, detailedOrderDto);
-        detailedOrderDto.setOrderProductDtoSet(orderProductMapper.toOrderProductDtoSet(order.getOrderProductSet()));
-        return detailedOrderDto;
-    }
-
-    private void mapCommonProperties(Order order, OrderDto orderDto) {
-        orderDto.setId(order.getId());
-        orderDto.setWeight(order.getWeight());
-        orderDto.setCost(order.getCost());
-        orderDto.setOrderDate(order.getOrderDate());
-        orderDto.setOrderStatus(order.getOrderStatus());
-        orderDto.setRestaurantId(order.getRestaurant().getId());
-        orderDto.setPersonId(order.getPerson().getId());
     }
 }

@@ -11,8 +11,5 @@ import lombok.NoArgsConstructor;
 public class CreateOrderProductDto {
     @JsonProperty("product_id")
     private Long productId;
-    private String name;
-    private Double price;
-    private Double weight;
     private Integer count;
 }

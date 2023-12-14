@@ -28,9 +28,6 @@ public class OrderProductMapper {
         OrderProduct orderProduct = new OrderProduct();
         Product product = new Product();
         product.setId(createOrderProductDto.getProductId());
-        product.setName(createOrderProductDto.getName());
-        product.setPrice(createOrderProductDto.getPrice());
-        product.setWeight(createOrderProductDto.getWeight());
         orderProduct.setProduct(product);
         orderProduct.setCount(createOrderProductDto.getCount());
 

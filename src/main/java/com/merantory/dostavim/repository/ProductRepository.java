@@ -37,10 +37,18 @@ public class ProductRepository {
         return productOptional;
     }
 
+
     public List<Product> getProducts(Integer limit, Integer offset) {
         String sqlQuery = "SELECT * FROM product LIMIT ? OFFSET ?";
         List<Product> productList = jdbcTemplate.query(sqlQuery, new ProductRowMapper(), limit, offset);
         return productList;
+    }
+
+    public List<Product> getProductsByIds(Set<Long> ids) {
+        String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String sqlQuery = String.format("SELECT * FROM product WHERE id IN (%s)", inSql);
+        Long[] idsArray = ids.toArray(new Long[0]);
+        return jdbcTemplate.query(sqlQuery, new ProductRowMapper(), idsArray);
     }
 
     public List<Product> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {

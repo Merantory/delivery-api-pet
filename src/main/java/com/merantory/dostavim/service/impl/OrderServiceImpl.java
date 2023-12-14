@@ -1,9 +1,11 @@
 package com.merantory.dostavim.service.impl;
 
-import com.merantory.dostavim.exception.OrderCreationFailed;
+import com.merantory.dostavim.exception.OrderCreationFailedException;
 import com.merantory.dostavim.model.Order;
 import com.merantory.dostavim.model.OrderProduct;
+import com.merantory.dostavim.model.Product;
 import com.merantory.dostavim.repository.OrderRepository;
+import com.merantory.dostavim.repository.ProductRepository;
 import com.merantory.dostavim.repository.RestaurantRepository;
 import com.merantory.dostavim.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,19 +15,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final RestaurantRepository restaurantRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, RestaurantRepository restaurantRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, RestaurantRepository restaurantRepository,
+                            ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.restaurantRepository = restaurantRepository;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -36,7 +41,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrders(Integer limit, Integer offset, Boolean detailed) {
-        return orderRepository.getOrders(limit, offset, detailed);
+        List<Order> orderList = (detailed) ? orderRepository.getDetailedOrders(limit, offset)
+                : orderRepository.getOrders(limit, offset);
+        return orderList;
     }
 
     @Override
@@ -47,25 +54,30 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order create(Order order) {
-        BigDecimal weight = BigDecimal.ZERO;
-        BigDecimal cost = BigDecimal.ZERO;
-        for (OrderProduct orderProduct : order.getOrderProductSet()) {
-            BigDecimal productWeight = BigDecimal.valueOf(orderProduct.getProduct().getWeight());
-            BigDecimal productPrice = BigDecimal.valueOf(orderProduct.getProduct().getPrice());
-            BigDecimal count = BigDecimal.valueOf(orderProduct.getCount());
-            weight = weight.add(productWeight.multiply(count));
-            cost = cost.add(productPrice.multiply(count));
+        Map<Long, Integer> productIdsCount = order.getOrderProductSet().stream()
+                .collect(Collectors.toMap(orderProduct -> orderProduct.getProduct().getId(), OrderProduct::getCount));
+        List<Product> productList = productRepository.getProductsByIds(productIdsCount.keySet());
+
+        BigDecimal orderTotalWeight = BigDecimal.ZERO;
+        BigDecimal orderTotalCost = BigDecimal.ZERO;
+        for (Product product : productList) {
+            BigDecimal productWeight = BigDecimal.valueOf(product.getWeight());
+            BigDecimal productPrice = BigDecimal.valueOf(product.getPrice());
+            BigDecimal count = BigDecimal.valueOf(productIdsCount.get(product.getId()));
+            orderTotalWeight = orderTotalWeight.add(productWeight.multiply(count));
+            orderTotalCost = orderTotalCost.add(productPrice.multiply(count));
         }
-        order.setWeight(weight.doubleValue());
-        order.setCost(cost.doubleValue());
+        order.setWeight(orderTotalWeight.doubleValue());
+        order.setCost(orderTotalCost.doubleValue());
         order.setOrderDate(Instant.now());
         order.setOrderStatus("In process");
+
         try {
             orderRepository.save(order);
             restaurantRepository.reduceProducts(order.getRestaurant().getId(), order.getOrderProductSet());
-            return order;
+            return orderRepository.getOrder(order.getId()).orElseThrow(OrderCreationFailedException::new);
         } catch (DataAccessException exception) {
-            throw new OrderCreationFailed();
+            throw new OrderCreationFailedException();
         }
     }
 

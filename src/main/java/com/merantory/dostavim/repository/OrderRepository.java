@@ -1,10 +1,12 @@
 package com.merantory.dostavim.repository;
 
+import com.merantory.dostavim.exception.OrderCreationFailedException;
 import com.merantory.dostavim.model.Order;
 import com.merantory.dostavim.model.OrderProduct;
 import com.merantory.dostavim.repository.mappers.OrderResultSetExtractor;
 import com.merantory.dostavim.repository.mappers.OrderRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,8 +54,7 @@ public class OrderRepository {
         return orderList;
     }
 
-    public List<Order> getOrders(Integer limit, Integer offset, Boolean detailed) {
-        if (!detailed) return getOrders(limit, offset);
+    public List<Order> getDetailedOrders(Integer limit, Integer offset) {
         String sqlQuery = "SELECT " +
                 "order_id, o.weight as order_weight, cost as order_cost, " +
                 "order_date, order_status, restaurant_id, person_id, product_id, " +
@@ -88,9 +89,13 @@ public class OrderRepository {
     }
 
     public Order save(Order order) {
-        saveOrder(order);
-        saveOrderProducts(order);
-        return order;
+        try {
+            saveOrder(order);
+            saveOrderProducts(order);
+            return getOrder(order.getId()).orElseThrow(OrderCreationFailedException::new);
+        } catch (DataAccessException exception) {
+            throw new OrderCreationFailedException();
+        }
     }
 
     private Boolean saveOrder(Order order) {
