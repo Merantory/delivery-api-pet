@@ -9,7 +9,7 @@ public interface ProductService {
     Optional<Product> getProduct(Long id);
     List<Product> getProducts(Integer limit, Integer offset);
     List<Product> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset);
-    Boolean create(Product product);
-    Boolean update(Product product);
-    Boolean delete(Long id);
+    Product create(Product product);
+    Product update(Product product);
+    Product delete(Long id);
 }

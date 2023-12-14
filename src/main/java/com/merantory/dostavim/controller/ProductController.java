@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Tags(
@@ -49,14 +49,12 @@ public class ProductController {
             tags = {"get_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(schema = @Schema(implementation = ProductDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProduct(@PathVariable("id") Long id) {
+    public ResponseEntity<ProductDto> getProduct(@PathVariable("id") Long id) {
         Optional<Product> productOptional = productService.getProduct(id);
         if (productOptional.isEmpty()) throw new ProductNotFoundException();
         return new ResponseEntity<>(productMapper.toProductDto(productOptional.get()), HttpStatus.OK);
@@ -82,16 +80,14 @@ public class ProductController {
             }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(array = @ArraySchema(schema = @Schema(implementation = ProductDto.class)),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @GetMapping
-    public ResponseEntity<?> getProducts(@RequestParam(value = "restaurant_id") Optional<Long> restaurantIdOptional,
-                                         @RequestParam(value = "limit") Optional<Integer> limitOptional,
-                                         @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
+    public ResponseEntity<List<ProductDto>> getProducts(@RequestParam(value = "restaurant_id") Optional<Long> restaurantIdOptional,
+                                                        @RequestParam(value = "limit") Optional<Integer> limitOptional,
+                                                        @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
@@ -104,7 +100,7 @@ public class ProductController {
                 .map(productMapper::toProductDto).toList(), HttpStatus.OK);
     }
 
-    private ResponseEntity<?> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {
+    private ResponseEntity<List<ProductDto>> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {
         if (restaurantId < 1) throw new IllegalRestaurantIdException();
 
         return new ResponseEntity<>(productService.getRestaurantProducts(restaurantId, limit, offset).stream()
@@ -116,18 +112,17 @@ public class ProductController {
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201",
-                    content = {@Content(schema = @Schema(implementation = ProductDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
     @PostMapping
-    public ResponseEntity<?> createProduct(@RequestBody CreateProductDto createProductDto) {
+    public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductDto createProductDto) {
         Product product = productMapper.toProduct(createProductDto);
-        Boolean isCreated = productService.create(product);
-        return (isCreated) ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        product = productService.create(product);
+        ProductDto productDto = productMapper.toProductDto(product);
+        return new ResponseEntity<>(productDto, HttpStatus.CREATED);
     }
 
     @Operation(
@@ -135,21 +130,20 @@ public class ProductController {
             tags = {"patch_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(schema = @Schema(implementation = ProductDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @PatchMapping("/{id}/edit")
-    public ResponseEntity<?> updateProduct(@PathVariable("id") Long id, @RequestBody CreateProductDto createProductDto) {
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") Long id, @RequestBody CreateProductDto createProductDto) {
         Product product = productMapper.toProduct(createProductDto);
         product.setId(id);
-        Boolean isUpdated = productService.update(product);
-        if (!isUpdated) throw new ProductNotFoundException();
-        return new ResponseEntity<>(HttpStatus.OK);
+        product = productService.update(product);
+        if (product == null) throw new ProductNotFoundException();
+        ProductDto productDto = productMapper.toProductDto(product);
+        return new ResponseEntity<>(productDto, HttpStatus.OK);
     }
 
     @Operation(
@@ -157,14 +151,15 @@ public class ProductController {
             tags = {"delete_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable("id") Long id) {
-        Boolean isDeleted = productService.delete(id);
-        if (!isDeleted) throw new ProductNotFoundException();
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<ProductDto> deleteProduct(@PathVariable("id") Long id) {
+        Product deletedProduct = productService.delete(id);
+        return new ResponseEntity<>(productMapper.toProductDto(deletedProduct), HttpStatus.OK);
     }
 }

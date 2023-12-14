@@ -1,17 +1,21 @@
 package com.merantory.dostavim.repository;
 
+import com.merantory.dostavim.exception.ProductCreationFailedException;
+import com.merantory.dostavim.exception.ProductDeleteFailedException;
 import com.merantory.dostavim.exception.ProductNotFoundException;
+import com.merantory.dostavim.exception.ProductUpdateFailedException;
 import com.merantory.dostavim.model.Product;
-import com.merantory.dostavim.exception.CategoryNotExistException;
 import com.merantory.dostavim.repository.mappers.ProductRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import java.sql.PreparedStatement;
+import java.util.*;
 
 @Repository
 public class ProductRepository {
@@ -49,31 +53,53 @@ public class ProductRepository {
         return productList;
     }
 
-    public Boolean save(Product product) {
+    public Product save(Product product) {
         String sqlQuery = "INSERT INTO product(name, price, weight, description, category) VALUES(?, ?, ?, ?, ?)";
-        Boolean isSaved = false;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
-            isSaved = (jdbcTemplate.update(sqlQuery, product.getName(), product.getPrice(), product.getWeight(),
-                    product.getDescription(), product.getCategory().getName())) != 0;
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[] {"id"});
+                ps.setString(1, product.getName());
+                ps.setDouble(2, product.getPrice());
+                ps.setDouble(3, product.getWeight());
+                ps.setString(4, product.getDescription());
+                ps.setString(5, product.getCategory().getName());
+                return ps;
+            }, keyHolder);
+            Long productId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+            product.setId(productId);
         } catch (DataAccessException e) {
-            throw new CategoryNotExistException();
+            throw new ProductCreationFailedException();
         }
-        return isSaved;
+        return product;
     }
 
-    public Boolean update(Product product) {
+    public Product update(Product product) {
         String sqlQuery = "UPDATE product SET name=?, price=?, weight=?, description=?, category=? WHERE id=?";
-        Boolean isUpdated = (jdbcTemplate.update(sqlQuery, product.getName(), product.getPrice(),
-                product.getWeight(), product.getDescription(), product.getCategory().getName(), product.getId())) != 0;
-        return isUpdated;
+        Boolean isUpdated = false;
+        try {
+            isUpdated = (jdbcTemplate.update(sqlQuery, product.getName(), product.getPrice(),
+                    product.getWeight(), product.getDescription(), product.getCategory().getName(), product.getId())) != 0;
+        } catch (DataAccessException exception) {
+            throw new ProductUpdateFailedException();
+        }
+        if (!isUpdated) {
+            throw new ProductNotFoundException();
+        }
+        return product;
     }
 
-    public Boolean delete(Long id) {
+    public Product delete(Long id) {
+        Product product = getProduct(id).orElseThrow(ProductNotFoundException::new);
         String sqlQuery = "DELETE FROM \"order\" WHERE id IN (SELECT order_id FROM order_product WHERE product_id=?); " +
                 "DELETE FROM order_product WHERE product_id=?; " +
                 "DELETE FROM product_restaurant WHERE product_id=?; " +
                 "DELETE FROM product WHERE id=?";
-        Boolean isDeleted = (jdbcTemplate.update(sqlQuery, id, id, id, id)) != 0;
-        return isDeleted;
+        try {
+            jdbcTemplate.update(sqlQuery, id, id, id, id);
+        } catch (DataAccessException exception) {
+            throw new ProductDeleteFailedException();
+        }
+        return product;
     }
 }
