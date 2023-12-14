@@ -26,3 +26,6 @@ databaseChangeLog:
   - include:
       relativeToChangelogFile: true
       file: changeset/order_product_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/insert_admin_in_person_table.yaml
