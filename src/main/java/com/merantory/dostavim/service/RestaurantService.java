@@ -8,9 +8,10 @@ import java.util.Optional;
 
 public interface RestaurantService {
     Optional<Restaurant> getRestaurant(Long id);
+    Optional<Restaurant> getRestaurantWithProducts(Long id);
     List<Restaurant> getRestaurants(Integer limit, Integer offset);
-    Boolean addOrUpdateProduct(ProductRestaurant productRestaurant);
-    Boolean create(Restaurant restaurant);
-    Boolean update(Restaurant restaurant);
-    Boolean delete(Long id);
+    Restaurant addOrUpdateProduct(ProductRestaurant productRestaurant);
+    Restaurant create(Restaurant restaurant);
+    Restaurant update(Restaurant restaurant);
+    Restaurant delete(Long id);
 }

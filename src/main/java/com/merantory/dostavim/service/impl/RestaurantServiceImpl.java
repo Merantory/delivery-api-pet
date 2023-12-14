@@ -28,31 +28,41 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
+    public Optional<Restaurant> getRestaurantWithProducts(Long id) {
+        Optional<Restaurant> restaurantOptional = restaurantRepository.getRestaurantWithProducts(id);
+        return restaurantOptional;
+    }
+
+    @Override
     public List<Restaurant> getRestaurants(Integer limit, Integer offset) {
         return restaurantRepository.getRestaurants(limit, offset);
     }
 
     @Override
     @Transactional
-    public Boolean addOrUpdateProduct(ProductRestaurant productRestaurant) {
-        return restaurantRepository.addOrUpdateProduct(productRestaurant);
+    public Restaurant addOrUpdateProduct(ProductRestaurant productRestaurant) {
+        Restaurant restaurant = restaurantRepository.addOrUpdateProduct(productRestaurant);
+        return restaurant;
     }
 
     @Override
     @Transactional
-    public Boolean create(Restaurant restaurant) {
-        return restaurantRepository.save(restaurant);
+    public Restaurant create(Restaurant restaurant) {
+        restaurant = restaurantRepository.save(restaurant);
+        return restaurant;
     }
 
     @Override
     @Transactional
-    public Boolean update(Restaurant restaurant) {
-        return restaurantRepository.update(restaurant);
+    public Restaurant update(Restaurant restaurant) {
+        restaurant = restaurantRepository.update(restaurant);
+        return restaurant;
     }
 
     @Override
     @Transactional
-    public Boolean delete(Long id) {
-        return restaurantRepository.delete(id);
+    public Restaurant delete(Long id) {
+        Restaurant restaurant = restaurantRepository.delete(id);
+        return restaurant;
     }
 }

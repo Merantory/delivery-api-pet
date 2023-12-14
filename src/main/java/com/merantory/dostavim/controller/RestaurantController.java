@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Tags(
@@ -54,15 +55,20 @@ public class RestaurantController {
             tags = {"get_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(schema = @Schema(implementation = RestaurantDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getRestaurant(@PathVariable Long id) {
+    public ResponseEntity<RestaurantDto> getRestaurant(@PathVariable Long id) {
         Optional<Restaurant> restaurantOptional = restaurantService.getRestaurant(id);
+        if (restaurantOptional.isEmpty()) throw new RestaurantNotFoundException();
+        return new ResponseEntity<>(restaurantMapper.toRestaurantDto(restaurantOptional.get()), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/products")
+    public ResponseEntity<RestaurantDto> getRestaurantWithProducts(@PathVariable Long id) {
+        Optional<Restaurant> restaurantOptional = restaurantService.getRestaurantWithProducts(id);
         if (restaurantOptional.isEmpty()) throw new RestaurantNotFoundException();
         return new ResponseEntity<>(restaurantMapper.toRestaurantDto(restaurantOptional.get()), HttpStatus.OK);
     }
@@ -82,15 +88,13 @@ public class RestaurantController {
             }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(array = @ArraySchema(schema = @Schema(implementation = RestaurantDto.class)),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @GetMapping
-    public ResponseEntity<?> getRestaurants(@RequestParam(value = "limit") Optional<Integer> limitOptional,
-                                            @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
+    public ResponseEntity<List<RestaurantDto>> getRestaurants(@RequestParam(value = "limit") Optional<Integer> limitOptional,
+                                                              @RequestParam(value = "offset") Optional<Integer> offsetOptional) {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
@@ -108,17 +112,18 @@ public class RestaurantController {
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @PostMapping("/add_product")
-    public ResponseEntity<?> addOrUpdateProducts(@RequestBody AddProductToRestaurantDto addProductToRestaurantDto) {
+    public ResponseEntity<RestaurantDto> addOrUpdateProducts(@RequestBody AddProductToRestaurantDto addProductToRestaurantDto) {
         ProductRestaurant productRestaurant = productRestaurantMapper.toProductRestaurant(addProductToRestaurantDto);
-        Boolean isApplied = restaurantService.addOrUpdateProduct(productRestaurant);
-        return new ResponseEntity<>(HttpStatus.OK);
+        Restaurant restaurant = restaurantService.addOrUpdateProduct(productRestaurant);
+        RestaurantDto restaurantDto = restaurantMapper.toRestaurantDto(restaurant);
+        return new ResponseEntity<>(restaurantDto, HttpStatus.OK);
     }
 
     @Operation(
@@ -126,18 +131,16 @@ public class RestaurantController {
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201",
-                    content = {@Content(schema = @Schema(implementation = RestaurantDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
     @PostMapping
-    public ResponseEntity<?> createRestaurant(@RequestBody CreateRestaurantDto createRestaurantDto) {
+    public ResponseEntity<RestaurantDto> createRestaurant(@RequestBody CreateRestaurantDto createRestaurantDto) {
         Restaurant restaurant = restaurantMapper.toRestaurant(createRestaurantDto);
-        Boolean isCreated = restaurantService.create(restaurant);
-        return (isCreated) ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        restaurant = restaurantService.create(restaurant);
+        return new ResponseEntity<>(restaurantMapper.toRestaurantDto(restaurant), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -145,22 +148,19 @@ public class RestaurantController {
             tags = {"patch_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200",
-                    content = {@Content(schema = @Schema(implementation = RestaurantDto.class),
-                            mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @PatchMapping("/{id}/edit")
-    public ResponseEntity<?> updateRestaurant(@PathVariable("id") Long id,
+    public ResponseEntity<RestaurantDto> updateRestaurant(@PathVariable("id") Long id,
                                               @RequestBody CreateRestaurantDto createRestaurantDto) {
         Restaurant restaurant = restaurantMapper.toRestaurant(createRestaurantDto);
         restaurant.setId(id);
-        Boolean isUpdated = restaurantService.update(restaurant);
-        if (!isUpdated) throw new RestaurantNotFoundException();
-        return new ResponseEntity<>(HttpStatus.OK);
+        restaurant = restaurantService.update(restaurant);
+        return new ResponseEntity<>(restaurantMapper.toRestaurantDto(restaurant), HttpStatus.OK);
     }
 
     @Operation(
@@ -168,16 +168,15 @@ public class RestaurantController {
             tags = {"delete_method_endpoints"}
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRestaurant(@PathVariable("id") Long id) {
-        Boolean isDeleted = restaurantService.delete(id);
-        if (!isDeleted) throw new RestaurantNotFoundException();
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<RestaurantDto> deleteRestaurant(@PathVariable("id") Long id) {
+        Restaurant restaurant = restaurantService.delete(id);
+        return new ResponseEntity<>(restaurantMapper.toRestaurantDto(restaurant), HttpStatus.OK);
     }
 }
