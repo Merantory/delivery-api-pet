@@ -13,4 +13,5 @@ public interface PersonService extends UserDetailsService {
     Boolean signUp(Person person);
     Boolean update(Person person);
     Boolean delete(Long id);
+    Person changeRole(Person person);
 }

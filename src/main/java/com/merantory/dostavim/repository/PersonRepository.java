@@ -65,4 +65,10 @@ public class PersonRepository {
         Boolean isDeleted = (jdbcTemplate.update(sqlQuery, id)) != 0;
         return isDeleted;
     }
+
+    public Boolean changeRole(Person person) {
+        String sqlQuery = "UPDATE person SET role=? WHERE id=?";
+        Boolean isChanged = (jdbcTemplate.update(sqlQuery, person.getRole(), person.getId())) != 0;
+        return isChanged;
+    }
 }

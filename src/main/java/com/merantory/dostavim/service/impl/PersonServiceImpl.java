@@ -1,5 +1,7 @@
 package com.merantory.dostavim.service.impl;
 
+import com.merantory.dostavim.exception.PersonNotFoundException;
+import com.merantory.dostavim.exception.PersonUpdateFailedException;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.repository.PersonRepository;
 import com.merantory.dostavim.service.PersonService;
@@ -70,5 +72,15 @@ public class PersonServiceImpl implements PersonService {
     @Transactional
     public Boolean delete(Long id) {
         return personRepository.delete(id);
+    }
+
+    @Override
+    @Transactional
+    public Person changeRole(Person person) {
+        Boolean isChanged = personRepository.changeRole(person);
+        if (isChanged) {
+            return getPerson(person.getId()).get();
+        }
+        throw new PersonNotFoundException();
     }
 }
