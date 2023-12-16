@@ -1,10 +1,11 @@
 package com.merantory.dostavim.service.impl;
 
 import com.merantory.dostavim.exception.OrderCreationFailedException;
-import com.merantory.dostavim.model.Order;
-import com.merantory.dostavim.model.OrderProduct;
-import com.merantory.dostavim.model.Product;
+import com.merantory.dostavim.exception.PersonNotFoundException;
+import com.merantory.dostavim.exception.RestaurantNotFoundException;
+import com.merantory.dostavim.model.*;
 import com.merantory.dostavim.repository.OrderRepository;
+import com.merantory.dostavim.repository.PersonRepository;
 import com.merantory.dostavim.repository.ProductRepository;
 import com.merantory.dostavim.repository.RestaurantRepository;
 import com.merantory.dostavim.service.OrderService;
@@ -24,13 +25,15 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final RestaurantRepository restaurantRepository;
     private final ProductRepository productRepository;
+    private final PersonRepository personRepository;
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository, RestaurantRepository restaurantRepository,
-                            ProductRepository productRepository) {
+                            ProductRepository productRepository, PersonRepository personRepository) {
         this.orderRepository = orderRepository;
         this.restaurantRepository = restaurantRepository;
         this.productRepository = productRepository;
+        this.personRepository = personRepository;
     }
 
     @Override
@@ -48,12 +51,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getPersonOrders(Long ownerPersonId, Integer limit, Integer offset, Boolean detailed) {
+        if (!isExistPerson(ownerPersonId)) {
+            throw new PersonNotFoundException();
+        }
         return orderRepository.getPersonOrders(ownerPersonId, limit, offset, detailed);
     }
 
     @Override
     @Transactional
     public Order create(Order order) {
+        if (!isExistRestaurant(order.getRestaurant())) {
+            throw new RestaurantNotFoundException();
+        }
         Map<Long, Integer> productIdsCount = order.getOrderProductSet().stream()
                 .collect(Collectors.toMap(orderProduct -> orderProduct.getProduct().getId(), OrderProduct::getCount));
         List<Product> productList = productRepository.getProductsByIds(productIdsCount.keySet());
@@ -91,5 +100,23 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Boolean delete(Long id) {
         return null;
+    }
+
+    private Boolean isExistPerson(Person person) {
+        return isExistPerson(person.getId());
+    }
+
+    private Boolean isExistPerson(Long personId) {
+        Optional<Person> personOptional = personRepository.getPerson(personId);
+        return personOptional.isPresent();
+    }
+
+    private Boolean isExistRestaurant(Restaurant restaurant) {
+        return isExistRestaurant(restaurant.getId());
+    }
+
+    private Boolean isExistRestaurant(Long restaurantId) {
+        Optional<Restaurant> restaurantOptional = restaurantRepository.getRestaurant(restaurantId);
+        return restaurantOptional.isPresent();
     }
 }
