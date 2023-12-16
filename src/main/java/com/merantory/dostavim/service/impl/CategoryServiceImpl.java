@@ -1,6 +1,6 @@
 package com.merantory.dostavim.service.impl;
 
-import com.merantory.dostavim.exception.CategoryAlreadyExists;
+import com.merantory.dostavim.exception.CategoryAlreadyExistsException;
 import com.merantory.dostavim.model.Category;
 import com.merantory.dostavim.repository.CategoryRepository;
 import com.merantory.dostavim.service.CategoryService;
@@ -29,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public Category create(Category category) {
         if (isExistCategory(category)) {
-            throw new CategoryAlreadyExists();
+            throw new CategoryAlreadyExistsException();
         }
         category = categoryRepository.save(category);
         return category;

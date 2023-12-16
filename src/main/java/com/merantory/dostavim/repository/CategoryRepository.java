@@ -1,6 +1,6 @@
 package com.merantory.dostavim.repository;
 
-import com.merantory.dostavim.exception.CategoryCreationFailed;
+import com.merantory.dostavim.exception.CategoryCreationFailedException;
 import com.merantory.dostavim.model.Category;
 import com.merantory.dostavim.repository.mappers.CategoryRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
 import java.util.List;
 
 @Repository
@@ -37,7 +36,7 @@ public class CategoryRepository {
         try {
             jdbcTemplate.update(sqlQuery, category.getName());
         } catch (DataAccessException exception) {
-            throw new CategoryCreationFailed();
+            throw new CategoryCreationFailedException();
         }
         return category;
     }
