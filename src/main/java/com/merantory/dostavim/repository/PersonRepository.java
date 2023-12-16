@@ -1,8 +1,13 @@
 package com.merantory.dostavim.repository;
 
+import com.merantory.dostavim.exception.PersonCreationFailedException;
+import com.merantory.dostavim.exception.PersonDeleteFailedException;
+import com.merantory.dostavim.exception.PersonUpdateInfoFailedException;
+import com.merantory.dostavim.exception.PersonUpdateRoleFailedException;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.repository.mappers.PersonRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -49,26 +54,46 @@ public class PersonRepository {
 
     public Boolean save(Person person) {
         String sqlQuery = "INSERT INTO person(email, password, name, phone_number, address, role) VALUES(?, ?, ?, ?, ?, ?)";
-        Boolean isSaved = (jdbcTemplate.update(sqlQuery, person.getEmail(), person.getPassword(),
+        Boolean isSaved = false;
+        try {
+            isSaved = (jdbcTemplate.update(sqlQuery, person.getEmail(), person.getPassword(),
                     person.getName(), person.getPhoneNumber(), person.getAddress(), person.getRole())) != 0;
+        } catch (DataAccessException exception) {
+            throw new PersonCreationFailedException();
+        }
         return isSaved;
     }
 
     public Boolean updatePersonInfo(Person person) {
         String sqlQuery = "UPDATE person SET name=?, address=? WHERE id=?";
-        Boolean isUpdated = (jdbcTemplate.update(sqlQuery, person.getName(), person.getAddress(), person.getId())) != 0;
+        Boolean isUpdated = false;
+        try {
+            isUpdated = (jdbcTemplate.update(sqlQuery, person.getName(), person.getAddress(), person.getId())) != 0;
+        } catch (DataAccessException exception) {
+            throw new PersonUpdateInfoFailedException();
+        }
         return isUpdated;
     }
 
     public Boolean delete(Long id) {
         String sqlQuery = "DELETE FROM person WHERE id=?";
-        Boolean isDeleted = (jdbcTemplate.update(sqlQuery, id)) != 0;
+        Boolean isDeleted = false;
+        try {
+            isDeleted = (jdbcTemplate.update(sqlQuery, id)) != 0;
+        } catch (DataAccessException exception) {
+            throw new PersonDeleteFailedException();
+        }
         return isDeleted;
     }
 
     public Boolean changeRole(Person person) {
         String sqlQuery = "UPDATE person SET role=? WHERE id=?";
-        Boolean isChanged = (jdbcTemplate.update(sqlQuery, person.getRole(), person.getId())) != 0;
+        Boolean isChanged = false;
+        try {
+            isChanged = (jdbcTemplate.update(sqlQuery, person.getRole(), person.getId())) != 0;
+        } catch (DataAccessException exception) {
+            throw new PersonUpdateRoleFailedException();
+        }
         return isChanged;
     }
 }

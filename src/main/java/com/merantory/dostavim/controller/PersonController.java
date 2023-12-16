@@ -134,8 +134,7 @@ public class PersonController {
         Person authPerson = getAuthenticationPerson();
         authPerson.setName(updatePersonInfoDto.getName());
         authPerson.setAddress(updatePersonInfoDto.getAddress());
-        Boolean isUpdated = personService.update(authPerson);
-        if (!isUpdated) throw new PersonUpdateFailedException();
+        personService.update(authPerson);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

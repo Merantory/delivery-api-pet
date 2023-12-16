@@ -1,13 +1,11 @@
 package com.merantory.dostavim.service.impl;
 
 import com.merantory.dostavim.exception.PersonNotFoundException;
-import com.merantory.dostavim.exception.PersonUpdateFailedException;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.repository.PersonRepository;
 import com.merantory.dostavim.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
