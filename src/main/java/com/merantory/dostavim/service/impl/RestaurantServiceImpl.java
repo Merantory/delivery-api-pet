@@ -1,7 +1,11 @@
 package com.merantory.dostavim.service.impl;
 
+import com.merantory.dostavim.exception.ProductNotFoundException;
+import com.merantory.dostavim.exception.RestaurantNotFoundException;
+import com.merantory.dostavim.model.Product;
 import com.merantory.dostavim.model.ProductRestaurant;
 import com.merantory.dostavim.model.Restaurant;
+import com.merantory.dostavim.repository.ProductRepository;
 import com.merantory.dostavim.repository.RestaurantRepository;
 import com.merantory.dostavim.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +19,12 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class RestaurantServiceImpl implements RestaurantService {
     private final RestaurantRepository restaurantRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public RestaurantServiceImpl(RestaurantRepository restaurantRepository) {
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository, ProductRepository productRepository) {
         this.restaurantRepository = restaurantRepository;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -41,6 +47,12 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     @Transactional
     public Restaurant addOrUpdateProduct(ProductRestaurant productRestaurant) {
+        if (!isExistProduct(productRestaurant.getProduct())) {
+            throw new ProductNotFoundException();
+        }
+        if (!isExistRestaurant(productRestaurant.getRestaurant())) {
+            throw new RestaurantNotFoundException();
+        }
         Restaurant restaurant = restaurantRepository.addOrUpdateProduct(productRestaurant);
         return restaurant;
     }
@@ -62,7 +74,28 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     @Transactional
     public Restaurant delete(Long id) {
+        if (!isExistRestaurant(id)) {
+            throw new RestaurantNotFoundException();
+        }
         Restaurant restaurant = restaurantRepository.delete(id);
         return restaurant;
+    }
+
+    private Boolean isExistProduct(Product product) {
+        return isExistProduct(product.getId());
+    }
+
+    private Boolean isExistProduct(Long productId) {
+        Optional<Product> productOptional = productRepository.getProduct(productId);
+        return productOptional.isPresent();
+    }
+
+    private Boolean isExistRestaurant(Restaurant restaurant) {
+        return isExistRestaurant(restaurant.getId());
+    }
+
+    private Boolean isExistRestaurant(Long restaurantId) {
+        Optional<Restaurant> restaurantOptional = restaurantRepository.getRestaurant(restaurantId);
+        return restaurantOptional.isPresent();
     }
 }
