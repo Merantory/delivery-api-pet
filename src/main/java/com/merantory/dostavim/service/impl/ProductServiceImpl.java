@@ -1,7 +1,14 @@
 package com.merantory.dostavim.service.impl;
 
+import com.merantory.dostavim.exception.CategoryNotExistException;
+import com.merantory.dostavim.exception.ProductNotFoundException;
+import com.merantory.dostavim.exception.RestaurantNotFoundException;
+import com.merantory.dostavim.model.Category;
 import com.merantory.dostavim.model.Product;
+import com.merantory.dostavim.model.Restaurant;
+import com.merantory.dostavim.repository.CategoryRepository;
 import com.merantory.dostavim.repository.ProductRepository;
+import com.merantory.dostavim.repository.RestaurantRepository;
 import com.merantory.dostavim.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,10 +21,15 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final RestaurantRepository restaurantRepository;
 
     @Autowired
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository,
+                              RestaurantRepository restaurantRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+        this.restaurantRepository = restaurantRepository;
     }
 
     @Override
@@ -33,12 +45,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {
+        if (!isExistRestaurant(restaurantId)) {
+            throw new RestaurantNotFoundException();
+        }
         return productRepository.getRestaurantProducts(restaurantId, limit, offset);
     }
 
     @Override
     @Transactional
     public Product create(Product product) {
+        if (!isExistCategory(product.getCategory())) {
+            throw new CategoryNotExistException();
+        }
         product = productRepository.save(product);
         return product;
     }
@@ -46,14 +64,38 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public Product update(Product product) {
-        product = productRepository.update(product);
-        return product;
+        if (!isExistCategory(product.getCategory())) {
+            throw new CategoryNotExistException();
+        }
+        Boolean isUpdated = productRepository.update(product);
+        if (!isUpdated) {
+            throw new ProductNotFoundException();
+        }
+        Optional<Product> updatedProduct = productRepository.getProduct(product.getId());
+        return updatedProduct.get();
     }
 
     @Override
     @Transactional
     public Product delete(Long id) {
-        Product product = productRepository.delete(id);
-        return product;
+        Optional<Product> productOptional = getProduct(id);
+        if (productOptional.isEmpty()) {
+            throw new ProductNotFoundException();
+        }
+        Boolean isDeleted = productRepository.delete(id);
+        return productOptional.get();
+    }
+
+    private Boolean isExistCategory(Category category) {
+        return categoryRepository.isExistCategory(category);
+    }
+
+    private Boolean isExistRestaurant(Restaurant restaurant) {
+        return isExistRestaurant(restaurant.getId());
+    }
+
+    private Boolean isExistRestaurant(Long restaurantId) {
+        Optional<Restaurant> restaurantOptional = restaurantRepository.getRestaurant(restaurantId);
+        return restaurantOptional.isPresent();
     }
 }

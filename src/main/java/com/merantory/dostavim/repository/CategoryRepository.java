@@ -26,6 +26,12 @@ public class CategoryRepository {
         return categoryList;
     }
 
+    public Boolean isExistCategory(Category category) {
+        String sqlQuery = "SELECT COUNT(*) FROM category WHERE name = ?";
+        Integer count = jdbcTemplate.queryForObject(sqlQuery, Integer.class, category.getName());
+        return count > 0;
+    }
+
     public Category save(Category category) {
         String sqlQuery = "INSERT INTO category(name) VALUES(?)";
         try {

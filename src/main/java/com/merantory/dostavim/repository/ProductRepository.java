@@ -1,6 +1,6 @@
 package com.merantory.dostavim.repository;
 
-import com.merantory.dostavim.exception.ProductCreationFailedException;
+import  com.merantory.dostavim.exception.ProductCreationFailedException;
 import com.merantory.dostavim.exception.ProductDeleteFailedException;
 import com.merantory.dostavim.exception.ProductNotFoundException;
 import com.merantory.dostavim.exception.ProductUpdateFailedException;
@@ -82,7 +82,7 @@ public class ProductRepository {
         return product;
     }
 
-    public Product update(Product product) {
+    public Boolean update(Product product) {
         String sqlQuery = "UPDATE product SET name=?, price=?, weight=?, description=?, category=? WHERE id=?";
         Boolean isUpdated = false;
         try {
@@ -94,20 +94,19 @@ public class ProductRepository {
         if (!isUpdated) {
             throw new ProductNotFoundException();
         }
-        return product;
+        return isUpdated;
     }
 
-    public Product delete(Long id) {
-        Product product = getProduct(id).orElseThrow(ProductNotFoundException::new);
+    public Boolean delete(Long id) {
         String sqlQuery = "DELETE FROM \"order\" WHERE id IN (SELECT order_id FROM order_product WHERE product_id=?); " +
                 "DELETE FROM order_product WHERE product_id=?; " +
                 "DELETE FROM product_restaurant WHERE product_id=?; " +
                 "DELETE FROM product WHERE id=?";
         try {
-            jdbcTemplate.update(sqlQuery, id, id, id, id);
+            Boolean isDeleted =  (jdbcTemplate.update(sqlQuery, id, id, id, id)) != 0;
+            return isDeleted;
         } catch (DataAccessException exception) {
             throw new ProductDeleteFailedException();
         }
-        return product;
     }
 }
