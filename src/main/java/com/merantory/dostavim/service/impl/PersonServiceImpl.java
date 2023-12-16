@@ -1,5 +1,6 @@
 package com.merantory.dostavim.service.impl;
 
+import com.merantory.dostavim.exception.PersonAlreadyExistException;
 import com.merantory.dostavim.exception.PersonNotFoundException;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.repository.PersonRepository;
@@ -56,6 +57,9 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public Boolean signUp(Person person) {
+        if (isExistPersonWithEmail(person)) {
+            throw new PersonAlreadyExistException();
+        }
         person.setPassword(passwordEncoder.encode(person.getPassword()));
         return personRepository.save(person);
     }
@@ -69,6 +73,9 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public Boolean delete(Long id) {
+        if (!isExistPerson(id)) {
+            throw new PersonNotFoundException();
+        }
         return personRepository.delete(id);
     }
 
@@ -80,5 +87,23 @@ public class PersonServiceImpl implements PersonService {
             return getPerson(person.getId()).get();
         }
         throw new PersonNotFoundException();
+    }
+
+    private Boolean isExistPersonWithEmail(Person person) {
+        return isExistPersonWithEmail(person.getEmail());
+    }
+
+    private Boolean isExistPersonWithEmail(String email) {
+        Optional<Person> personOptional = personRepository.getByEmail(email);
+        return personOptional.isPresent();
+    }
+
+    private Boolean isExistPerson(Person person) {
+        return isExistPerson(person.getId());
+    }
+
+    private Boolean isExistPerson(Long id) {
+        Optional<Person> personOptional = personRepository.getPerson(id);
+        return personOptional.isPresent();
     }
 }
