@@ -58,6 +58,7 @@ public class SignController {
 
     @Operation(
             description = "Авторизация пользователя в системе с возвращением JWT токена.",
+            summary = "Доступен только не авторизированным пользователям.",
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
@@ -82,11 +83,13 @@ public class SignController {
 
     @Operation(
             description = "Регистрация пользователя в системе с возвращением JWT токена.",
+            summary = "Доступен только не авторизированным пользователям.",
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))}),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
     @PostMapping("/up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpPersonDto signUpPersonDto,

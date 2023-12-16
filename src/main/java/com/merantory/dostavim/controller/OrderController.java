@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
@@ -49,14 +50,18 @@ public class OrderController {
     }
 
     @Operation(
-            description = "Возвращает заказ, соответствующий идентификатору.",
+            description = "Возвращает заказ, соответствующим идентификатором.",
+            summary = "Доступен только администраторам.",
             tags = {"get_method_endpoints"}
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @GetMapping("/{id}")
     public ResponseEntity<OrderDto> getOrder(@PathVariable @Positive Long id) {
         Person person = getAuthenticationPerson();
@@ -76,6 +81,7 @@ public class OrderController {
 
     @Operation(
             description = "Возвращает массив всех заказов в системе.",
+            summary = "Доступен только администраторам.",
             tags = {"get_method_endpoints"},
             parameters = {
                     @Parameter(name = "limit", in = ParameterIn.QUERY, description =
@@ -98,6 +104,7 @@ public class OrderController {
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @GetMapping("/all")
     public ResponseEntity<List<OrderDto>> getOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
                                                     @RequestParam(value = "offset") Optional<Integer> offsetOptional,
@@ -115,6 +122,7 @@ public class OrderController {
 
     @Operation(
             description = "Возвращает массив заказов авторизированного пользователя.",
+            summary = "Доступен только авторизированным пользователям и администраторам.",
             tags = {"get_method_endpoints"},
             parameters = {
             @Parameter(name = "limit", in = ParameterIn.QUERY, description =
@@ -136,6 +144,7 @@ public class OrderController {
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @GetMapping()
     public ResponseEntity<List<OrderDto>> getPersonOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
                                              @RequestParam(value = "offset") Optional<Integer> offsetOptional,
@@ -154,6 +163,7 @@ public class OrderController {
 
     @Operation(
             description = "Создание заказа для текущего авторизированного пользователя.",
+            summary = "Доступен только авторизированным пользователям или администраторам.",
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
@@ -161,6 +171,7 @@ public class OrderController {
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PostMapping
     public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody CreateOrderDto createOrderDto) {
         Person creator = getAuthenticationPerson();

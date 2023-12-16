@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
@@ -24,8 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,8 +65,7 @@ public class PersonController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
     })
     @GetMapping()
     public ResponseEntity<List<PersonDto>> getPersons(@RequestParam(value = "limit") Optional<Integer> limitOptional,
@@ -87,7 +87,7 @@ public class PersonController {
     @ApiResponses({
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> getPersons(@PathVariable @Positive Long id) {
@@ -96,6 +96,19 @@ public class PersonController {
         return new ResponseEntity<>(personMapper.toPersonDto(personOptional.get()), HttpStatus.OK);
     }
 
+    @Operation(
+            description = "Меняет роль пользователя.",
+            summary = "Доступен только администраторам.",
+            tags = {"get_method_endpoints"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
+    })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PatchMapping("/change_role")
     public ResponseEntity<PersonDto> changePersonRole(@Valid @RequestBody ChangePersonRoleDto changePersonRoleDto) {
         Person person = personMapper.toPerson(changePersonRoleDto);
@@ -105,6 +118,7 @@ public class PersonController {
 
     @Operation(
             description = "Обновление информации пользователя.",
+            summary = "Доступен только авторизированным пользователям или администраторам.",
             tags = {"patch_method_endpoints"}
     )
     @ApiResponses({
@@ -114,6 +128,7 @@ public class PersonController {
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PatchMapping("/update_info")
     public ResponseEntity<?> updatePersonInfo(@Valid @RequestBody UpdatePersonInfoDto updatePersonInfoDto) {
         Person authPerson = getAuthenticationPerson();

@@ -33,3 +33,6 @@ HELP.md
 
 # idea
 .idea
+
+#Properties files
+/src/main/resources/application-dev.properties

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
@@ -66,7 +67,7 @@ public class ProductController {
 
     @Operation(
             description = "Возвращает массив всех товаров в ресторане с переданным идентификатором, " +
-                    "если идентификатор не передан, возвращаются все заказы в системе",
+                    "если идентификатор не передан, возвращаются все товары в системе.",
             tags = {"get_method_endpoints"},
             parameters = {
                     @Parameter(name = "limit", in = ParameterIn.QUERY, description =
@@ -113,6 +114,7 @@ public class ProductController {
 
     @Operation(
             description = "Создание товара в системе.",
+            summary = "Доступен только администраторам.",
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
@@ -121,6 +123,7 @@ public class ProductController {
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody CreateProductDto createProductDto) {
         Product product = productMapper.toProduct(createProductDto);
@@ -131,6 +134,7 @@ public class ProductController {
 
     @Operation(
             description = "Обновляет информация о товаре, с соответствующим идентификатором.",
+            summary = "Доступен только администраторам.",
             tags = {"patch_method_endpoints"}
     )
     @ApiResponses({
@@ -140,6 +144,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PatchMapping("/{id}/edit")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") @Positive Long id,
                                                     @Valid @RequestBody CreateProductDto createProductDto) {
@@ -153,6 +158,7 @@ public class ProductController {
 
     @Operation(
             description = "Удаляет продукт, соответствующим идентификатором из системы.",
+            summary = "Доступен только администраторам.",
             tags = {"delete_method_endpoints"}
     )
     @ApiResponses({
@@ -162,6 +168,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @DeleteMapping("/{id}")
     public ResponseEntity<ProductDto> deleteProduct(@PathVariable("id") @Positive Long id) {
         Product deletedProduct = productService.delete(id);

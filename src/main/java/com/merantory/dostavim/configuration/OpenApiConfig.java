@@ -1,5 +1,7 @@
 package com.merantory.dostavim.configuration;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -11,11 +13,18 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "JWT Bearer Authentication",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        description = "JWT для аутентификации, без тега \"Bearer\"",
+        scheme = "Bearer"
+)
 public class OpenApiConfig {
     @Value("${openapi.dev-url}")
     private String devUrl;
 
-    @Value("${openapi.dev-url}")
+    @Value("${openapi.prod-url}")
     private String prodUrl;
 
     @Bean

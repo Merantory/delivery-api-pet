@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
@@ -54,7 +55,7 @@ public class RestaurantController {
     }
 
     @Operation(
-            description = "Возвращает ресторан, соответствующий идентификатору.",
+            description = "Возвращает ресторан, соответствующим идентификатором.",
             tags = {"get_method_endpoints"}
     )
     @ApiResponses({
@@ -77,7 +78,7 @@ public class RestaurantController {
     }
 
     @Operation(
-            description = "Возвращает ресторан, соответствующий идентификатору.",
+            description = "Возвращает ресторан, с соответствующим идентификатором.",
             tags = {"get_method_endpoints"},
             parameters = {
                     @Parameter(name = "limit", in = ParameterIn.QUERY, description =
@@ -110,8 +111,9 @@ public class RestaurantController {
 
     @Operation(
             description = "Добавляет продукты в определенном количестве в ресторан, с соответствующим идентификатором. " +
-                    "Если данных продуктов не существовало в ресторане до этого, они создатся с указанным количеством, " +
-                    "иначе количество имеющихся продуктов увеличится на указанное в запросе.",
+                    "Если данных продуктов не существовало в ресторане до этого, они создаются с указанным количеством, " +
+                    "иначе количество имеющихся продуктов в ресторане увеличится на указанное в запросе.",
+            summary = "Доступен только администраторам.",
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
@@ -121,6 +123,7 @@ public class RestaurantController {
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PostMapping("/add_product")
     public ResponseEntity<RestaurantDto> addOrUpdateProducts(@Valid @RequestBody AddProductToRestaurantDto addProductToRestaurantDto) {
         ProductRestaurant productRestaurant = productRestaurantMapper.toProductRestaurant(addProductToRestaurantDto);
@@ -131,6 +134,7 @@ public class RestaurantController {
 
     @Operation(
             description = "Создает ресторан в системе.",
+            summary = "Доступен только администраторам.",
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
@@ -139,6 +143,7 @@ public class RestaurantController {
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PostMapping
     public ResponseEntity<RestaurantDto> createRestaurant(@Valid @RequestBody CreateRestaurantDto createRestaurantDto) {
         Restaurant restaurant = restaurantMapper.toRestaurant(createRestaurantDto);
@@ -148,6 +153,7 @@ public class RestaurantController {
 
     @Operation(
             description = "Обновляет информация о ресторане, с соответствующим идентификатором.",
+            summary = "Доступен только администраторам.",
             tags = {"patch_method_endpoints"}
     )
     @ApiResponses({
@@ -157,6 +163,7 @@ public class RestaurantController {
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PatchMapping("/{id}/edit")
     public ResponseEntity<RestaurantDto> updateRestaurant(@PathVariable("id") @Positive Long id,
                                                           @Valid @RequestBody CreateRestaurantDto createRestaurantDto) {
@@ -168,6 +175,7 @@ public class RestaurantController {
 
     @Operation(
             description = "Удаляет ресторан, соответствующий идентификатору из системы.",
+            summary = "Доступен только администраторам.",
             tags = {"delete_method_endpoints"}
     )
     @ApiResponses({
@@ -177,6 +185,7 @@ public class RestaurantController {
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @DeleteMapping("/{id}")
     public ResponseEntity<RestaurantDto> deleteRestaurant(@PathVariable("id") @Positive Long id) {
         Restaurant restaurant = restaurantService.delete(id);

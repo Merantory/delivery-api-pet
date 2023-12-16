@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
@@ -78,6 +79,7 @@ public class CategoryController {
 
     @Operation(
             description = "Создание категории в системе.",
+            summary = "Доступен только администраторам.",
             tags = {"post_method_endpoints"}
     )
     @ApiResponses({
@@ -86,6 +88,7 @@ public class CategoryController {
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     })
+    @SecurityRequirement(name = "JWT Bearer Authentication")
     @PostMapping
     public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CreateCategoryDto createCategoryDto) {
         Category category = categoryMapper.toCategory(createCategoryDto);
