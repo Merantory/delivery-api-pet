@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateCategoryDto {
     @NotEmpty(message = "Значение поля не должно быть пустым")
-    @Pattern(regexp = "[a-zA-Z]+", message = "Поле содержит запрещенные символы")
+    @Pattern(regexp = "^[a-zA-Zа-яА-Я]+(?:\\s[a-zA-Zа-яА-Я]+)*$", message = "Поле содержит запрещенные символы")
     private String name;
 }
