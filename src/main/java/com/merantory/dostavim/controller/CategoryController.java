@@ -86,7 +86,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "409", content = {@Content(schema = @Schema())})
     })
     @SecurityRequirement(name = "JWT Bearer Authentication")
     @PostMapping
