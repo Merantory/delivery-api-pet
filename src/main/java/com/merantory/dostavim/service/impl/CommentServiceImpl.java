@@ -1,11 +1,13 @@
 package com.merantory.dostavim.service.impl;
 
 import com.merantory.dostavim.exception.CommentAlreadyExistException;
+import com.merantory.dostavim.exception.PersonNotFoundException;
 import com.merantory.dostavim.exception.ProductNotFoundException;
 import com.merantory.dostavim.model.Comment;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.model.Product;
 import com.merantory.dostavim.repository.CommentRepository;
+import com.merantory.dostavim.repository.PersonRepository;
 import com.merantory.dostavim.repository.ProductRepository;
 import com.merantory.dostavim.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +22,14 @@ import java.util.Optional;
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final ProductRepository productRepository;
+    private final PersonRepository personRepository;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, ProductRepository productRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository, ProductRepository productRepository,
+                              PersonRepository personRepository) {
         this.commentRepository = commentRepository;
         this.productRepository = productRepository;
+        this.personRepository = personRepository;
     }
 
     @Override
@@ -41,12 +46,18 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<Comment> getProductComments(Long productId, Integer limit, Integer offset) {
+        if (!isExistProduct(productId)) {
+            throw new ProductNotFoundException();
+        }
         List<Comment> commentList = commentRepository.getProductComments(productId, limit, offset);
         return commentList;
     }
 
     @Override
     public List<Comment> getPersonComments(Long personId, Integer limit, Integer offset) {
+        if (!isExistPerson(personId)) {
+            throw new PersonNotFoundException();
+        }
         List<Comment> commentList = commentRepository.getPersonComments(personId, limit, offset);
         return commentList;
     }
@@ -80,5 +91,14 @@ public class CommentServiceImpl implements CommentService {
     private Boolean isExistCommentByPersonForThisProduct(Long creatorId, Long productId) {
         Optional<Comment> commentOptional = commentRepository.getPersonForProductComment(creatorId, productId);
         return commentOptional.isPresent();
+    }
+
+    private Boolean isExistPerson(Person person) {
+        return isExistPerson(person.getId());
+    }
+
+    private Boolean isExistPerson(Long personId) {
+        Optional<Person> personOptional = personRepository.getPerson(personId);
+        return personOptional.isPresent();
     }
 }
