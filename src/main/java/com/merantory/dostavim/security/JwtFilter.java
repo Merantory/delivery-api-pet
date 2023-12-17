@@ -1,6 +1,7 @@
 package com.merantory.dostavim.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.merantory.dostavim.exception.JWTExpiredTokenException;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.service.PersonService;
 import jakarta.servlet.FilterChain;
@@ -50,9 +51,14 @@ public class JwtFilter extends OncePerRequestFilter {
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     }
+                } catch (JWTExpiredTokenException exception) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                            "JWT token has been expired");
+                    return;
                 } catch (JWTVerificationException exception) {
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                             "Invalid JWT token");
+                    return;
                 }
             }
         }

@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.merantory.dostavim.exception.JWTExpiredTokenException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,12 +29,20 @@ public class JwtUtil {
                 .sign(Algorithm.HMAC256(secret));
     }
 
-    public String validateTokenAndRetrieveClaim(String jwtToken) throws JWTVerificationException {
+    public String validateTokenAndRetrieveClaim(String jwtToken) throws JWTVerificationException, JWTExpiredTokenException {
         return verifyToken(jwtToken).getClaim("email").asString();
     }
 
-    private DecodedJWT verifyToken(String jwtToken) throws JWTVerificationException {
-        return verifyTokenBuild().verify(jwtToken);
+    private DecodedJWT verifyToken(String jwtToken) throws JWTVerificationException, JWTExpiredTokenException {
+        DecodedJWT decodedJWT = JWT.decode(jwtToken);
+        try {
+            return verifyTokenBuild().verify(jwtToken);
+        } catch (JWTVerificationException jwtVerificationException) {
+            if (decodedJWT.getExpiresAtAsInstant().isBefore(Instant.now())) {
+                throw new JWTExpiredTokenException();
+            }
+            throw jwtVerificationException;
+        }
     }
     private JWTVerifier verifyTokenBuild() {
         return JWT.require(Algorithm.HMAC256(secret))
