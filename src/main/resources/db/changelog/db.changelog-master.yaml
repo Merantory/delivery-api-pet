@@ -29,3 +29,6 @@ databaseChangeLog:
   - include:
       relativeToChangelogFile: true
       file: changeset/insert_admin_in_person_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/comment_table.yaml

@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 10
+      author: merantory
+      changes:
+        - tagDatabase:
+            tag: commentTableTag
+        - sqlFile:
+            dbms: "postgresql"
+            relativeToChangelogFile: true
+            path: sql/create_comment_table.sql
+
+      rollback:
+        - sqlFile:
+            dbms: "postgresql"
+            relativeToChangelogFile: true
+            path: sql/rollback_comment_table.sql
