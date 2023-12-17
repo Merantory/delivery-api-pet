@@ -89,7 +89,8 @@ public class SignController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))}),
             @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "409", content = {@Content(schema = @Schema())})
     })
     @PostMapping("/up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpPersonDto signUpPersonDto,
