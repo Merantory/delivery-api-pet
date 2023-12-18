@@ -113,8 +113,10 @@ public class OrderController {
         Integer offset = offsetOptional.orElse(0);
         Boolean detailed = detailedOptional.orElse(false);
 
-        if (limit < 1) throw new IllegalLimitArgumentException();
-        if (offset < 0) throw new IllegalOffsetArgumentException();
+        if (limit < 1) throw new IllegalLimitArgumentException(
+                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
+        if (offset < 0) throw new IllegalOffsetArgumentException(
+                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
 
         return new ResponseEntity<>(orderService.getOrders(limit, offset, detailed).stream()
                 .map(orderMapper::toOrderDto).toList(), HttpStatus.OK);
@@ -153,8 +155,10 @@ public class OrderController {
         Integer offset = offsetOptional.orElse(0);
         Boolean detailed = detailedOptional.orElse(true);
 
-        if (limit < 1) throw new IllegalLimitArgumentException();
-        if (offset < 0) throw new IllegalOffsetArgumentException();
+        if (limit < 1) throw new IllegalLimitArgumentException(
+                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
+        if (offset < 0) throw new IllegalOffsetArgumentException(
+                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
         Long ordersOwnerId = getAuthenticationPerson().getId();
 
         return new ResponseEntity<>(orderService.getPersonOrders(ordersOwnerId, limit, offset, detailed).stream()

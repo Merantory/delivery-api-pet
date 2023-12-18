@@ -5,4 +5,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class RestaurantDeleteFailedException extends RuntimeException {
+    public RestaurantDeleteFailedException() {
+        super();
+    }
+
+    public RestaurantDeleteFailedException(String msg) {
+        super(msg);
+    }
 }

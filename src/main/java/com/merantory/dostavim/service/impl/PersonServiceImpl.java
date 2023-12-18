@@ -58,7 +58,8 @@ public class PersonServiceImpl implements PersonService {
     @Transactional
     public Boolean signUp(Person person) {
         if (isExistPersonWithEmail(person)) {
-            throw new PersonAlreadyExistException();
+            throw new PersonAlreadyExistException(String.format("Peron with this email %s already exist.",
+                    person.getEmail()));
         }
         person.setPassword(passwordEncoder.encode(person.getPassword()));
         return personRepository.save(person);
@@ -74,7 +75,7 @@ public class PersonServiceImpl implements PersonService {
     @Transactional
     public Boolean delete(Long id) {
         if (!isExistPerson(id)) {
-            throw new PersonNotFoundException();
+            throw new PersonNotFoundException(String.format("Person with id %d not found.", id));
         }
         return personRepository.delete(id);
     }
@@ -86,7 +87,7 @@ public class PersonServiceImpl implements PersonService {
         if (isChanged) {
             return getPerson(person.getId()).get();
         }
-        throw new PersonNotFoundException();
+        throw new PersonNotFoundException(String.format("Person with id %d not found.", person.getId()));
     }
 
     private Boolean isExistPersonWithEmail(Person person) {

@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {
         if (!isExistRestaurant(restaurantId)) {
-            throw new RestaurantNotFoundException();
+            throw new RestaurantNotFoundException(String.format("Restaurant with id %d not found.", restaurantId));
         }
         return productRepository.getRestaurantProducts(restaurantId, limit, offset);
     }
@@ -55,7 +55,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Product create(Product product) {
         if (!isExistCategory(product.getCategory())) {
-            throw new CategoryNotExistException();
+            throw new CategoryNotExistException(String.format("Category with name '%s' doesnt exist.",
+                    product.getCategory().getName()));
         }
         product = productRepository.save(product);
         return product;
@@ -65,11 +66,12 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Product update(Product product) {
         if (!isExistCategory(product.getCategory())) {
-            throw new CategoryNotExistException();
+            throw new CategoryNotExistException(String.format("Category with name '%s' doesnt exist.",
+                    product.getCategory().getName()));
         }
         Boolean isUpdated = productRepository.update(product);
         if (!isUpdated) {
-            throw new ProductNotFoundException();
+            throw new ProductNotFoundException(String.format("Product with id %d not found.", product.getId()));
         }
         Optional<Product> updatedProduct = productRepository.getProduct(product.getId());
         return updatedProduct.get();
@@ -80,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
     public Product delete(Long id) {
         Optional<Product> productOptional = getProduct(id);
         if (productOptional.isEmpty()) {
-            throw new ProductNotFoundException();
+            throw new ProductNotFoundException(String.format("Product with id %d not found.", id));
         }
         Boolean isDeleted = productRepository.delete(id);
         return productOptional.get();

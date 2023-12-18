@@ -4,12 +4,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class ProductCreationFailedException extends RuntimeException {
-    public ProductCreationFailedException() {
+public class IllegalRestaurantIdArgumentException extends IllegalArgumentException {
+    public IllegalRestaurantIdArgumentException() {
         super();
     }
 
-    public ProductCreationFailedException(String msg) {
+    public IllegalRestaurantIdArgumentException(String msg) {
         super(msg);
     }
 }

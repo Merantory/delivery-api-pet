@@ -1,6 +1,6 @@
 package com.merantory.dostavim.repository;
 
-import  com.merantory.dostavim.exception.ProductCreationFailedException;
+import com.merantory.dostavim.exception.ProductCreationFailedException;
 import com.merantory.dostavim.exception.ProductDeleteFailedException;
 import com.merantory.dostavim.exception.ProductNotFoundException;
 import com.merantory.dostavim.exception.ProductUpdateFailedException;
@@ -92,7 +92,7 @@ public class ProductRepository {
             throw new ProductUpdateFailedException();
         }
         if (!isUpdated) {
-            throw new ProductNotFoundException();
+            throw new ProductNotFoundException(String.format("Product with id %d not found.", product.getId()));
         }
         return isUpdated;
     }

@@ -48,10 +48,12 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Transactional
     public Restaurant addOrUpdateProduct(ProductRestaurant productRestaurant) {
         if (!isExistProduct(productRestaurant.getProduct())) {
-            throw new ProductNotFoundException();
+            throw new ProductNotFoundException(String.format("Product with id %d not found.",
+                    productRestaurant.getProduct().getId()));
         }
         if (!isExistRestaurant(productRestaurant.getRestaurant())) {
-            throw new RestaurantNotFoundException();
+            throw new RestaurantNotFoundException(String.format("Restaurant with id %d not found.",
+                    productRestaurant.getRestaurant().getId()));
         }
         Restaurant restaurant = restaurantRepository.addOrUpdateProduct(productRestaurant);
         return restaurant;
@@ -75,7 +77,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Transactional
     public Restaurant delete(Long id) {
         if (!isExistRestaurant(id)) {
-            throw new RestaurantNotFoundException();
+            throw new RestaurantNotFoundException(String.format("Restaurant with id %d not found.", id));
         }
         Restaurant restaurant = restaurantRepository.delete(id);
         return restaurant;

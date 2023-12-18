@@ -60,7 +60,9 @@ public class RestaurantRepository {
             throw new RestaurantAddProductFailedException();
         }
         Optional<Restaurant> restaurantOptional = getRestaurantWithProducts(productRestaurant.getRestaurant().getId());
-        return restaurantOptional.orElseThrow(RestaurantNotFoundException::new);
+        return restaurantOptional.orElseThrow(()
+                -> new RestaurantNotFoundException(
+                        String.format("Restaurant with id %d not found.", productRestaurant.getRestaurant().getId())));
     }
 
     public Optional<Restaurant> getRestaurantWithProducts(Long restaurantId) {
@@ -111,7 +113,7 @@ public class RestaurantRepository {
             throw new RestaurantUpdateFailedException();
         }
         if (!isUpdated) {
-            throw new RestaurantNotFoundException();
+            throw new RestaurantNotFoundException(String.format("Restaurant with id %d not found.", restaurant.getId()));
         }
         return restaurant;
     }

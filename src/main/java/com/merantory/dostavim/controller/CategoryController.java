@@ -70,8 +70,10 @@ public class CategoryController {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
-        if (limit < 1) throw new IllegalLimitArgumentException();
-        if (offset < 0) throw new IllegalOffsetArgumentException();
+        if (limit < 1) throw new IllegalLimitArgumentException(
+                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
+        if (offset < 0) throw new IllegalOffsetArgumentException(
+                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
 
         return new ResponseEntity<>(categoryService.getCategories(limit, offset).stream()
                 .map(categoryMapper::toCategoryDto).toList(), HttpStatus.OK);

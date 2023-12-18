@@ -5,7 +5,7 @@ import com.merantory.dostavim.dto.impl.product.ProductDto;
 import com.merantory.dostavim.dto.mappers.product.ProductMapper;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
-import com.merantory.dostavim.exception.IllegalRestaurantIdException;
+import com.merantory.dostavim.exception.IllegalRestaurantIdArgumentException;
 import com.merantory.dostavim.exception.ProductNotFoundException;
 import com.merantory.dostavim.model.Product;
 import com.merantory.dostavim.service.ProductService;
@@ -96,8 +96,10 @@ public class ProductController {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
-        if (limit < 1) throw new IllegalLimitArgumentException();
-        if (offset < 0) throw new IllegalOffsetArgumentException();
+        if (limit < 1) throw new IllegalLimitArgumentException(
+                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
+        if (offset < 0) throw new IllegalOffsetArgumentException(
+                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
 
         if (restaurantIdOptional.isPresent()) return getRestaurantProducts(restaurantIdOptional.get(), limit, offset);
 
@@ -106,7 +108,8 @@ public class ProductController {
     }
 
     private ResponseEntity<List<ProductDto>> getRestaurantProducts(Long restaurantId, Integer limit, Integer offset) {
-        if (restaurantId < 1) throw new IllegalRestaurantIdException();
+        if (restaurantId < 1) throw new IllegalRestaurantIdArgumentException(
+                String.format("Invalid restaurant_id argument value. Its should be positive. Received: %d", restaurantId));
 
         return new ResponseEntity<>(productService.getRestaurantProducts(restaurantId, limit, offset).stream()
                 .map(productMapper::toProductDto).toList(), HttpStatus.OK);

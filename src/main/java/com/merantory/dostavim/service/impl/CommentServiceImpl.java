@@ -47,7 +47,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<Comment> getProductComments(Long productId, Integer limit, Integer offset) {
         if (!isExistProduct(productId)) {
-            throw new ProductNotFoundException();
+            throw new ProductNotFoundException(String.format("Product with id %d not found.", productId));
         }
         List<Comment> commentList = commentRepository.getProductComments(productId, limit, offset);
         return commentList;
@@ -56,7 +56,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<Comment> getPersonComments(Long personId, Integer limit, Integer offset) {
         if (!isExistPerson(personId)) {
-            throw new PersonNotFoundException();
+            throw new PersonNotFoundException(String.format("Person with id %d not found.", personId));
         }
         List<Comment> commentList = commentRepository.getPersonComments(personId, limit, offset);
         return commentList;
@@ -66,10 +66,13 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public Comment create(Comment comment) {
         if (!isExistProduct(comment.getProduct())) {
-            throw new ProductNotFoundException();
+            throw new ProductNotFoundException(String.format("Product with id %d not found.",
+                    comment.getProduct().getId()));
         }
         if (isExistCommentByPersonForThisProduct(comment.getCreator(), comment.getProduct())) {
-            throw new CommentAlreadyExistException();
+            throw new CommentAlreadyExistException(
+                    String.format("Comment by user with id %d for product with id %d already exist.",
+                            comment.getCreator().getId(), comment.getProduct().getId()));
         }
         comment = commentRepository.save(comment);
         return comment;

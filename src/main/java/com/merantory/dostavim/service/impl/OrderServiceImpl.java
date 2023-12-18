@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> getPersonOrders(Long ownerPersonId, Integer limit, Integer offset, Boolean detailed) {
         if (!isExistPerson(ownerPersonId)) {
-            throw new PersonNotFoundException();
+            throw new PersonNotFoundException(String.format("Person with id %d not found.", ownerPersonId));
         }
         return orderRepository.getPersonOrders(ownerPersonId, limit, offset, detailed);
     }
@@ -61,7 +63,8 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order create(Order order) {
         if (!isExistRestaurant(order.getRestaurant())) {
-            throw new RestaurantNotFoundException();
+            throw new RestaurantNotFoundException(String.format("Restaurant with id %d not found.",
+                    order.getRestaurant().getId()));
         }
         Map<Long, Integer> productIdsCount = order.getOrderProductSet().stream()
                 .collect(Collectors.toMap(orderProduct -> orderProduct.getProduct().getId(), OrderProduct::getCount));

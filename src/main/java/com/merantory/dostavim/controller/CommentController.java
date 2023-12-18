@@ -95,8 +95,10 @@ public class CommentController {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
-        if (limit < 1) throw new IllegalLimitArgumentException();
-        if (offset < 0) throw new IllegalOffsetArgumentException();
+        if (limit < 1) throw new IllegalLimitArgumentException(
+                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
+        if (offset < 0) throw new IllegalOffsetArgumentException(
+                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
 
         return new ResponseEntity<>(commentService.getComments(limit, offset).stream().map(commentMapper::toCommentDto).toList(), HttpStatus.OK);
     }
@@ -130,8 +132,10 @@ public class CommentController {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
-        if (limit < 1) throw new IllegalLimitArgumentException();
-        if (offset < 0) throw new IllegalOffsetArgumentException();
+        if (limit < 1) throw new IllegalLimitArgumentException(
+                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
+        if (offset < 0) throw new IllegalOffsetArgumentException(
+                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
 
         return new ResponseEntity<>(commentService.getProductComments(productId, limit, offset).stream().map(commentMapper::toCommentDto).toList(), HttpStatus.OK);
     }
@@ -165,8 +169,10 @@ public class CommentController {
         Integer limit = limitOptional.orElse(1);
         Integer offset = offsetOptional.orElse(0);
 
-        if (limit < 1) throw new IllegalLimitArgumentException();
-        if (offset < 0) throw new IllegalOffsetArgumentException();
+        if (limit < 1) throw new IllegalLimitArgumentException(
+                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
+        if (offset < 0) throw new IllegalOffsetArgumentException(
+                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
 
         return new ResponseEntity<>(commentService.getPersonComments(personId, limit, offset).stream().map(commentMapper::toCommentDto).toList(), HttpStatus.OK);
     }
