@@ -9,6 +9,7 @@ import com.merantory.dostavim.repository.PersonRepository;
 import com.merantory.dostavim.repository.ProductRepository;
 import com.merantory.dostavim.repository.RestaurantRepository;
 import com.merantory.dostavim.service.OrderService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
@@ -40,12 +42,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Optional<Order> getOrder(Long id) {
+        log.info("Trying to load order with id: {}", id);
         Optional<Order> orderOptional = orderRepository.getOrder(id);
         return orderOptional;
     }
 
     @Override
     public List<Order> getOrders(Integer limit, Integer offset, Boolean detailed) {
+        log.info("Trying to load orders with limit={} and offset={} and detailed={}", limit, offset, detailed);
         List<Order> orderList = (detailed) ? orderRepository.getDetailedOrders(limit, offset)
                 : orderRepository.getOrders(limit, offset);
         return orderList;
@@ -53,7 +57,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getPersonOrders(Long ownerPersonId, Integer limit, Integer offset, Boolean detailed) {
+        log.info("Trying to load orders by person with id={} with limit={} and offset={} and detailed={}",
+                ownerPersonId, limit, offset, detailed);
         if (!isExistPerson(ownerPersonId)) {
+            log.info("Person with id={} not found", ownerPersonId);
             throw new PersonNotFoundException(String.format("Person with id %d not found.", ownerPersonId));
         }
         return orderRepository.getPersonOrders(ownerPersonId, limit, offset, detailed);
@@ -62,7 +69,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order create(Order order) {
+        log.info("Trying to create order: {}", order);
         if (!isExistRestaurant(order.getRestaurant())) {
+            log.info("Restaurant with id={} not found", order.getRestaurant().getId());
             throw new RestaurantNotFoundException(String.format("Restaurant with id %d not found.",
                     order.getRestaurant().getId()));
         }
@@ -83,10 +92,11 @@ public class OrderServiceImpl implements OrderService {
         order.setCost(orderTotalCost.doubleValue());
         order.setOrderDate(Instant.now());
         order.setOrderStatus("In process");
-
+        log.info("Prepared for save order: {}", order);
         try {
             orderRepository.save(order);
             restaurantRepository.reduceProducts(order.getRestaurant().getId(), order.getOrderProductSet());
+            log.info("Order has been created: {}", order);
             return orderRepository.getOrder(order.getId()).orElseThrow(OrderCreationFailedException::new);
         } catch (DataAccessException exception) {
             throw new OrderCreationFailedException();

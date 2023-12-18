@@ -5,6 +5,7 @@ import com.merantory.dostavim.exception.PersonNotFoundException;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.repository.PersonRepository;
 import com.merantory.dostavim.service.PersonService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 public class PersonServiceImpl implements PersonService {
 
@@ -30,8 +32,10 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public Person loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.info("Trying to load person with email={}", username);
         Optional<Person> personOptional = personRepository.getByEmail(username);
         if (personOptional.isEmpty()) {
+            log.info("Person with email={} not found", username);
             throw new BadCredentialsException("User with this email not found");
         }
         return personOptional.get();
@@ -39,42 +43,52 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public Optional<Person> getPersonByEmail(String email) {
+        log.info("Trying to load person with email={}", email);
         Optional<Person> personOptional = personRepository.getByEmail(email);
         return personOptional;
     }
 
     @Override
     public Optional<Person> getPerson(Long id) {
+        log.info("Trying to load person with id={}", id);
         Optional<Person> personOptional = personRepository.getPerson(id);
         return personOptional;
     }
 
     @Override
     public List<Person> getPersons(Integer limit, Integer offset) {
+        log.info("Trying to load person with limit={} and offset={}", limit, offset);
         return personRepository.getPersons(limit, offset);
     }
 
     @Override
     @Transactional
     public Boolean signUp(Person person) {
+        log.info("Trying to sign up person: {}", person);
         if (isExistPersonWithEmail(person)) {
-            throw new PersonAlreadyExistException(String.format("Peron with this email %s already exist.",
+            log.info("Person with email={} already exist", person.getEmail());
+            throw new PersonAlreadyExistException(String.format("Person with this email %s already exist.",
                     person.getEmail()));
         }
         person.setPassword(passwordEncoder.encode(person.getPassword()));
-        return personRepository.save(person);
+        Boolean isSaved = personRepository.save(person);
+        log.info("Person has been created: {}", person);
+        return isSaved;
     }
 
     @Override
     @Transactional
     public Boolean update(Person person) {
+        log.info("Trying to update person with id={} on data: {}", person.getId(), person);
         return personRepository.updatePersonInfo(person);
     }
 
     @Override
     @Transactional
     public Boolean delete(Long id) {
+        log.info("Trying to delete person with id={}", id);
         if (!isExistPerson(id)) {
+            log.info("Person with id={} not found", id);
             throw new PersonNotFoundException(String.format("Person with id %d not found.", id));
         }
         return personRepository.delete(id);
@@ -83,11 +97,15 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public Person changeRole(Person person) {
-        Boolean isChanged = personRepository.changeRole(person);
-        if (isChanged) {
-            return getPerson(person.getId()).get();
+        log.info("Trying to change role for person with id={} on new role={}", person.getId(), person.getRole());
+        if (!isExistPerson(person.getId())) {
+            log.info("Person with id={} not found", person.getId());
+            throw new PersonNotFoundException(String.format("Person with id %d not found.", person.getId()));
         }
-        throw new PersonNotFoundException(String.format("Person with id %d not found.", person.getId()));
+        Boolean isChanged = personRepository.changeRole(person);
+        person = getPerson(person.getId()).get();
+        log.info("Person role has been changed: {}", person);
+        return person;
     }
 
     private Boolean isExistPersonWithEmail(Person person) {

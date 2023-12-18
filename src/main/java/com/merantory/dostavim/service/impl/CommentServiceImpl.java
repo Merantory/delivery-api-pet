@@ -10,6 +10,7 @@ import com.merantory.dostavim.repository.CommentRepository;
 import com.merantory.dostavim.repository.PersonRepository;
 import com.merantory.dostavim.repository.ProductRepository;
 import com.merantory.dostavim.service.CommentService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
@@ -34,19 +36,23 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Optional<Comment> getComment(Long id) {
+        log.info("Trying to load comment with id: {}", id);
         Optional<Comment> commentOptional = commentRepository.getComment(id);
         return commentOptional;
     }
 
     @Override
     public List<Comment> getComments(Integer limit, Integer offset) {
+        log.info("Trying to load comments with limit={} and offset={}", limit, offset);
         List<Comment> commentList = commentRepository.getComments(limit, offset);
         return commentList;
     }
 
     @Override
     public List<Comment> getProductComments(Long productId, Integer limit, Integer offset) {
+        log.info("Trying to load comments for product with id={} with limit={} and offset={}", productId, limit, offset);
         if (!isExistProduct(productId)) {
+            log.info("Product with id={} not found", productId);
             throw new ProductNotFoundException(String.format("Product with id %d not found.", productId));
         }
         List<Comment> commentList = commentRepository.getProductComments(productId, limit, offset);
@@ -55,7 +61,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<Comment> getPersonComments(Long personId, Integer limit, Integer offset) {
+        log.info("Trying to load comments by person with id={} with limit={} and offset={}", personId, limit, offset);
         if (!isExistPerson(personId)) {
+            log.info("Person with id={} not found", personId);
             throw new PersonNotFoundException(String.format("Person with id %d not found.", personId));
         }
         List<Comment> commentList = commentRepository.getPersonComments(personId, limit, offset);
@@ -65,16 +73,21 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public Comment create(Comment comment) {
+        log.info("Trying to create comment: {}", comment);
         if (!isExistProduct(comment.getProduct())) {
+            log.info("Product with id={} not found", comment.getProduct().getId());
             throw new ProductNotFoundException(String.format("Product with id %d not found.",
                     comment.getProduct().getId()));
         }
         if (isExistCommentByPersonForThisProduct(comment.getCreator(), comment.getProduct())) {
+            log.info("Comment by person with id={} for product with id={} already exist",
+                    comment.getCreator().getId(), comment.getProduct().getId());
             throw new CommentAlreadyExistException(
-                    String.format("Comment by user with id %d for product with id %d already exist.",
+                    String.format("Comment by person with id %d for product with id %d already exist.",
                             comment.getCreator().getId(), comment.getProduct().getId()));
         }
         comment = commentRepository.save(comment);
+        log.info("Comment has been created: {}", comment);
         return comment;
     }
 
