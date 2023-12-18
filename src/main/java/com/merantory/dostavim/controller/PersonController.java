@@ -126,12 +126,12 @@ public class PersonController {
 	@ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
 	@SecurityRequirement(name = "JWT Bearer Authentication")
 	@PatchMapping("/update_info")
-	public ResponseEntity<?> updatePersonInfo(@Valid @RequestBody UpdatePersonInfoDto updatePersonInfoDto) {
+	public ResponseEntity<PersonDto> updatePersonInfo(@Valid @RequestBody UpdatePersonInfoDto updatePersonInfoDto) {
 		Person authPerson = getAuthenticationPerson();
 		authPerson.setName(updatePersonInfoDto.getName());
 		authPerson.setAddress(updatePersonInfoDto.getAddress());
-		personService.update(authPerson);
-		return new ResponseEntity<>(HttpStatus.OK);
+		Person updatedPerson = personService.update(authPerson);
+		return new ResponseEntity<>(personMapper.toPersonDto(updatedPerson), HttpStatus.OK);
 	}
 
 	private Person getAuthenticationPerson() {

@@ -78,20 +78,29 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional
-    public Boolean update(Person person) {
+    public Person update(Person person) {
         log.info("Trying to update person with id={} on data: {}", person.getId(), person);
-        return personRepository.updatePersonInfo(person);
+        if (!isExistPerson(person)) {
+            log.info("Person with id={} not found", person.getId());
+            throw new PersonNotFoundException(String.format("Person with id %d not found.", person.getId()));
+        }
+        Boolean isUpdated = personRepository.updatePersonInfo(person);
+        Optional<Person> updatedPersonOptional = getPerson(person.getId());
+        log.info("Person has been updated: {}", updatedPersonOptional.get());
+        return updatedPersonOptional.get();
     }
 
     @Override
     @Transactional
-    public Boolean delete(Long id) {
+    public Person delete(Long id) {
         log.info("Trying to delete person with id={}", id);
-        if (!isExistPerson(id)) {
+        Optional<Person> personOptional = getPerson(id);
+        if (personOptional.isEmpty()) {
             log.info("Person with id={} not found", id);
             throw new PersonNotFoundException(String.format("Person with id %d not found.", id));
         }
-        return personRepository.delete(id);
+        personRepository.delete(id);
+        return personOptional.get();
     }
 
     @Override

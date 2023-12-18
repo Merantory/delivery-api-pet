@@ -11,7 +11,7 @@ public interface PersonService extends UserDetailsService {
     Optional<Person> getPerson(Long id);
     List<Person> getPersons(Integer limit, Integer offset);
     Boolean signUp(Person person);
-    Boolean update(Person person);
-    Boolean delete(Long id);
+    Person update(Person person);
+    Person delete(Long id);
     Person changeRole(Person person);
 }
