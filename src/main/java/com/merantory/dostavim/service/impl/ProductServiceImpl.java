@@ -75,16 +75,16 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Product update(Product product) {
         log.info("Trying to update product with id={} on new data={}", product.getId(), product);
+        if (!isExistProduct(product)) {
+            log.info("Product with id={} not found", product.getId());
+            throw new ProductNotFoundException(String.format("Product with id %d not found.", product.getId()));
+        }
         if (!isExistCategory(product.getCategory())) {
             log.info("Category with name={} doesnt exist", product.getCategory().getName());
             throw new CategoryNotExistException(String.format("Category with name '%s' doesnt exist.",
                     product.getCategory().getName()));
         }
         Boolean isUpdated = productRepository.update(product);
-        if (!isUpdated) {
-            log.info("Product with id={} not found", product.getId());
-            throw new ProductNotFoundException(String.format("Product with id %d not found.", product.getId()));
-        }
         Optional<Product> updatedProduct = productRepository.getProduct(product.getId());
         log.info("Product has been updated: {}", updatedProduct.get());
         return updatedProduct.get();
@@ -115,5 +115,14 @@ public class ProductServiceImpl implements ProductService {
     private Boolean isExistRestaurant(Long restaurantId) {
         Optional<Restaurant> restaurantOptional = restaurantRepository.getRestaurant(restaurantId);
         return restaurantOptional.isPresent();
+    }
+
+    private Boolean isExistProduct(Product product) {
+        return isExistProduct(product.getId());
+    }
+
+    private Boolean isExistProduct(Long id) {
+        Optional<Product> productOptional = productRepository.getProduct(id);
+        return productOptional.isPresent();
     }
 }
