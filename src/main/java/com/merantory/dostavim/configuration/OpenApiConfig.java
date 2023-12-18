@@ -14,39 +14,39 @@ import java.util.List;
 
 @Configuration
 @SecurityScheme(
-        name = "JWT Bearer Authentication",
-        type = SecuritySchemeType.HTTP,
-        bearerFormat = "JWT",
-        description = "JWT для аутентификации, без тега \"Bearer\"",
-        scheme = "Bearer"
+		name = "JWT Bearer Authentication",
+		type = SecuritySchemeType.HTTP,
+		bearerFormat = "JWT",
+		description = "JWT для аутентификации, без тега \"Bearer\"",
+		scheme = "Bearer"
 )
 public class OpenApiConfig {
-    @Value("${openapi.dev-url}")
-    private String devUrl;
+	@Value("${openapi.dev-url}")
+	private String devUrl;
 
-    @Value("${openapi.prod-url}")
-    private String prodUrl;
+	@Value("${openapi.prod-url}")
+	private String prodUrl;
 
-    @Bean
-    public OpenAPI myOpenAPI() {
-        Server devServer = new Server();
-        devServer.setUrl(devUrl);
-        devServer.setDescription("Server URL в разработке");
+	@Bean
+	public OpenAPI myOpenAPI() {
+		Server devServer = new Server();
+		devServer.setUrl(devUrl);
+		devServer.setDescription("Server URL в разработке");
 
-        Server prodServer = new Server();
-        prodServer.setUrl(prodUrl);
-        prodServer.setDescription("Server URL в проде");
+		Server prodServer = new Server();
+		prodServer.setUrl(prodUrl);
+		prodServer.setDescription("Server URL в проде");
 
-        Contact contact = new Contact();
-        contact.setEmail("tynin22@gmail.com");
-        contact.setName("Stanislav");
+		Contact contact = new Contact();
+		contact.setEmail("tynin22@gmail.com");
+		contact.setName("Stanislav");
 
-        Info info = new Info()
-                .title("Dostavim API")
-                .version("0.1")
-                .contact(contact)
-                .description("Не является публичным API");
+		Info info = new Info()
+				.title("Dostavim API")
+				.version("0.1")
+				.contact(contact)
+				.description("Не является публичным API");
 
-        return new OpenAPI().info(info).servers(List.of(devServer, prodServer));
-    }
+		return new OpenAPI().info(info).servers(List.of(devServer, prodServer));
+	}
 }

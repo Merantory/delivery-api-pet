@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
@@ -61,13 +60,12 @@ public class SignController {
             summary = "Доступен только не авторизированным пользователям.",
             tags = {"post_method_endpoints"}
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))}),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
-    })
+    @ApiResponse(responseCode = "200",
+            content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))})
+    @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     @PostMapping("/in")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInPersonDto signInPersonDto) {
         UsernamePasswordAuthenticationToken authenticationToken =
@@ -86,12 +84,11 @@ public class SignController {
             summary = "Доступен только не авторизированным пользователям.",
             tags = {"post_method_endpoints"}
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))}),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "409", content = {@Content(schema = @Schema())})
-    })
+    @ApiResponse(responseCode = "201",
+            content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))})
+    @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "409", content = {@Content(schema = @Schema())})
     @PostMapping("/up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpPersonDto signUpPersonDto,
                                                           BindingResult bindingResult) {

@@ -2,9 +2,7 @@ package com.merantory.dostavim.dto.impl.restaurant;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.merantory.dostavim.dto.impl.product.ProductDto;
 import com.merantory.dostavim.dto.impl.productRestaurant.ProductRestaurantDto;
-import com.merantory.dostavim.model.ProductRestaurant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

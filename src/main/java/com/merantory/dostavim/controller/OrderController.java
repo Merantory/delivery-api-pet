@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
@@ -32,165 +31,161 @@ import java.util.List;
 import java.util.Optional;
 
 @Tags(
-        value = {
-                @Tag(name = "order-controller", description = "API для работы с заказами")
-        }
+		value = {
+				@Tag(name = "order-controller", description = "API для работы с заказами")
+		}
 )
 @RestController
 @RequestMapping("/orders")
 @Validated
 public class OrderController {
-    private final OrderService orderService;
-    private final OrderMapper orderMapper;
+	private final OrderService orderService;
+	private final OrderMapper orderMapper;
+	private static final String INVALID_LIMIT_MESSAGE =
+			"Invalid limit argument value. Its should be positive. Received: %d";
+	private static final String INVALID_OFFSET_MESSAGE =
+			"Invalid offset argument value. Its should be not negative. Received: %d";
 
-    @Autowired
-    public OrderController(OrderService orderService, OrderMapper orderMapper) {
-        this.orderService = orderService;
-        this.orderMapper = orderMapper;
-    }
+	@Autowired
+	public OrderController(OrderService orderService, OrderMapper orderMapper) {
+		this.orderService = orderService;
+		this.orderMapper = orderMapper;
+	}
 
-    @Operation(
-            description = "Возвращает заказ, соответствующим идентификатором.",
-            summary = "Доступен только администраторам.",
-            tags = {"get_method_endpoints"}
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
-    })
-    @SecurityRequirement(name = "JWT Bearer Authentication")
-    @GetMapping("/{id}")
-    public ResponseEntity<OrderDto> getOrder(@PathVariable @Positive Long id) {
-        Person person = getAuthenticationPerson();
+	@Operation(
+			description = "Возвращает заказ, соответствующим идентификатором.",
+			summary = "Доступен только администраторам.",
+			tags = {"get_method_endpoints"}
+	)
+	@ApiResponse(responseCode = "200")
+	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
+	@SecurityRequirement(name = "JWT Bearer Authentication")
+	@GetMapping("/{id}")
+	public ResponseEntity<OrderDto> getOrder(@PathVariable @Positive Long id) {
+		Person person = getAuthenticationPerson();
 
-        Optional<Order> orderOptional = orderService.getOrder(id);
+		Optional<Order> orderOptional = orderService.getOrder(id);
 
-        if (orderOptional.isEmpty()) {
-            throw new OrderNotFoundException();
-        }
-        Order order = orderOptional.get();
-        if (!person.getRole().equals("ROLE_ADMIN") && !order.getPerson().getId().equals(person.getId())) {
-            throw new ForbiddenException();
-        }
+		if (orderOptional.isEmpty()) {
+			throw new OrderNotFoundException();
+		}
+		Order order = orderOptional.get();
+		if (!person.getRole().equals("ROLE_ADMIN") && !order.getPerson().getId().equals(person.getId())) {
+			throw new ForbiddenException();
+		}
 
-        return new ResponseEntity<>(orderMapper.toOrderDto(orderOptional.get()), HttpStatus.OK);
-    }
+		return new ResponseEntity<>(orderMapper.toOrderDto(orderOptional.get()), HttpStatus.OK);
+	}
 
-    @Operation(
-            description = "Возвращает массив всех заказов в системе.",
-            summary = "Доступен только администраторам.",
-            tags = {"get_method_endpoints"},
-            parameters = {
-                    @Parameter(name = "limit", in = ParameterIn.QUERY, description =
-                            "Максимальное количество заказов в выдаче. " +
-                                    "Если параметр не передан, то значение по умолчанию равно 1.",
-                            required = false, style = ParameterStyle.SIMPLE),
-                    @Parameter(name = "offset", in = ParameterIn.QUERY, description =
-                            "Количество заказов, которое нужно пропустить для отображения текущей страницы. " +
-                                    "Если параметр не передан, то значение по умолчанию равно 0.",
-                            required = false, style = ParameterStyle.SIMPLE),
-                    @Parameter(name = "detailed", in = ParameterIn.QUERY, description =
-                            "Необходимость в передаче списка продуктов заказа. " +
-                                    "Если параметр не передан, то значение по умолчанию равно false",
-                            required = false, style = ParameterStyle.SIMPLE)
-            }
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
-    })
-    @SecurityRequirement(name = "JWT Bearer Authentication")
-    @GetMapping("/all")
-    public ResponseEntity<List<OrderDto>> getOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
-                                                    @RequestParam(value = "offset") Optional<Integer> offsetOptional,
-                                                    @RequestParam(value = "detailed") Optional<Boolean> detailedOptional) {
-        Integer limit = limitOptional.orElse(1);
-        Integer offset = offsetOptional.orElse(0);
-        Boolean detailed = detailedOptional.orElse(false);
+	@Operation(
+			description = "Возвращает массив всех заказов в системе.",
+			summary = "Доступен только администраторам.",
+			tags = {"get_method_endpoints"},
+			parameters = {
+					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
+							"Максимальное количество заказов в выдаче. " +
+									"Если параметр не передан, то значение по умолчанию равно 1.",
+							required = false, style = ParameterStyle.SIMPLE),
+					@Parameter(name = "offset", in = ParameterIn.QUERY, description =
+							"Количество заказов, которое нужно пропустить для отображения текущей страницы. " +
+									"Если параметр не передан, то значение по умолчанию равно 0.",
+							required = false, style = ParameterStyle.SIMPLE),
+					@Parameter(name = "detailed", in = ParameterIn.QUERY, description =
+							"Необходимость в передаче списка продуктов заказа. " +
+									"Если параметр не передан, то значение по умолчанию равно false",
+							required = false, style = ParameterStyle.SIMPLE)
+			}
+	)
+	@ApiResponse(responseCode = "200")
+	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+	@SecurityRequirement(name = "JWT Bearer Authentication")
+	@GetMapping("/all")
+	public ResponseEntity<List<OrderDto>> getOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
+													@RequestParam(value = "offset") Optional<Integer> offsetOptional,
+													@RequestParam(value = "detailed") Optional<Boolean> detailedOptional) {
+		Integer limit = limitOptional.orElse(1);
+		Integer offset = offsetOptional.orElse(0);
+		Boolean detailed = detailedOptional.orElse(false);
 
-        if (limit < 1) throw new IllegalLimitArgumentException(
-                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
-        if (offset < 0) throw new IllegalOffsetArgumentException(
-                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
+		if (limit < 1) throw new IllegalLimitArgumentException(
+				String.format(INVALID_LIMIT_MESSAGE, limit));
+		if (offset < 0) throw new IllegalOffsetArgumentException(
+				String.format(INVALID_OFFSET_MESSAGE, offset));
 
-        return new ResponseEntity<>(orderService.getOrders(limit, offset, detailed).stream()
-                .map(orderMapper::toOrderDto).toList(), HttpStatus.OK);
-    }
+		return new ResponseEntity<>(orderService.getOrders(limit, offset, detailed).stream()
+				.map(orderMapper::toOrderDto).toList(), HttpStatus.OK);
+	}
 
-    @Operation(
-            description = "Возвращает массив заказов авторизированного пользователя.",
-            summary = "Доступен только авторизированным пользователям и администраторам.",
-            tags = {"get_method_endpoints"},
-            parameters = {
-            @Parameter(name = "limit", in = ParameterIn.QUERY, description =
-                    "Максимальное количество заказов в выдаче. " +
-                            "Если параметр не передан, то значение по умолчанию равно 1.",
-                    required = false, style = ParameterStyle.SIMPLE),
-            @Parameter(name = "offset", in = ParameterIn.QUERY, description =
-                    "Количество заказов, которое нужно пропустить для отображения текущей страницы. " +
-                            "Если параметр не передан, то значение по умолчанию равно 0.",
-                    required = false, style = ParameterStyle.SIMPLE),
-            @Parameter(name = "detailed", in = ParameterIn.QUERY, description =
-                    "Необходимость в передаче списка продуктов заказа. " +
-                            "Если параметр не передан, то значение по умолчанию равно true",
-                    required = false, style = ParameterStyle.SIMPLE)
-    }
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
-    })
-    @SecurityRequirement(name = "JWT Bearer Authentication")
-    @GetMapping()
-    public ResponseEntity<List<OrderDto>> getPersonOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
-                                             @RequestParam(value = "offset") Optional<Integer> offsetOptional,
-                                             @RequestParam(value = "detailed") Optional<Boolean> detailedOptional) {
-        Integer limit = limitOptional.orElse(1);
-        Integer offset = offsetOptional.orElse(0);
-        Boolean detailed = detailedOptional.orElse(true);
+	@Operation(
+			description = "Возвращает массив заказов авторизированного пользователя.",
+			summary = "Доступен только авторизированным пользователям и администраторам.",
+			tags = {"get_method_endpoints"},
+			parameters = {
+					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
+							"Максимальное количество заказов в выдаче. " +
+									"Если параметр не передан, то значение по умолчанию равно 1.",
+							required = false, style = ParameterStyle.SIMPLE),
+					@Parameter(name = "offset", in = ParameterIn.QUERY, description =
+							"Количество заказов, которое нужно пропустить для отображения текущей страницы. " +
+									"Если параметр не передан, то значение по умолчанию равно 0.",
+							required = false, style = ParameterStyle.SIMPLE),
+					@Parameter(name = "detailed", in = ParameterIn.QUERY, description =
+							"Необходимость в передаче списка продуктов заказа. " +
+									"Если параметр не передан, то значение по умолчанию равно true",
+							required = false, style = ParameterStyle.SIMPLE)
+			}
+	)
+	@ApiResponse(responseCode = "200")
+	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+	@SecurityRequirement(name = "JWT Bearer Authentication")
+	@GetMapping()
+	public ResponseEntity<List<OrderDto>> getPersonOrders(@RequestParam(value = "limit") Optional<Integer> limitOptional,
+														  @RequestParam(value = "offset") Optional<Integer> offsetOptional,
+														  @RequestParam(value = "detailed") Optional<Boolean> detailedOptional) {
+		Integer limit = limitOptional.orElse(1);
+		Integer offset = offsetOptional.orElse(0);
+		Boolean detailed = detailedOptional.orElse(true);
 
-        if (limit < 1) throw new IllegalLimitArgumentException(
-                String.format("Invalid limit argument value. Its should be positive. Received: %d", limit));
-        if (offset < 0) throw new IllegalOffsetArgumentException(
-                String.format("Invalid offset argument value. Its should be not negative. Received: %d", offset));
-        Long ordersOwnerId = getAuthenticationPerson().getId();
+		if (limit < 1) throw new IllegalLimitArgumentException(
+				String.format(INVALID_LIMIT_MESSAGE, limit));
+		if (offset < 0) throw new IllegalOffsetArgumentException(
+				String.format(INVALID_OFFSET_MESSAGE, offset));
+		Long ordersOwnerId = getAuthenticationPerson().getId();
 
-        return new ResponseEntity<>(orderService.getPersonOrders(ordersOwnerId, limit, offset, detailed).stream()
-                .map(orderMapper::toOrderDto).toList(), HttpStatus.OK);
-    }
+		return new ResponseEntity<>(orderService.getPersonOrders(ordersOwnerId, limit, offset, detailed).stream()
+				.map(orderMapper::toOrderDto).toList(), HttpStatus.OK);
+	}
 
-    @Operation(
-            description = "Создание заказа для текущего авторизированного пользователя.",
-            summary = "Доступен только авторизированным пользователям или администраторам.",
-            tags = {"post_method_endpoints"}
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
-    })
-    @SecurityRequirement(name = "JWT Bearer Authentication")
-    @PostMapping
-    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody CreateOrderDto createOrderDto) {
-        Person creator = getAuthenticationPerson();
-        Order order = orderMapper.toOrder(createOrderDto);
-        order.setPerson(creator);
-        Order createdOrder = orderService.create(order);
-        return new ResponseEntity<>(orderMapper.toOrderDto(createdOrder), HttpStatus.CREATED);
-    }
+	@Operation(
+			description = "Создание заказа для текущего авторизированного пользователя.",
+			summary = "Доступен только авторизированным пользователям или администраторам.",
+			tags = {"post_method_endpoints"}
+	)
+	@ApiResponse(responseCode = "201")
+	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+	@SecurityRequirement(name = "JWT Bearer Authentication")
+	@PostMapping
+	public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody CreateOrderDto createOrderDto) {
+		Person creator = getAuthenticationPerson();
+		Order order = orderMapper.toOrder(createOrderDto);
+		order.setPerson(creator);
+		Order createdOrder = orderService.create(order);
+		return new ResponseEntity<>(orderMapper.toOrderDto(createdOrder), HttpStatus.CREATED);
+	}
 
-    private Person getAuthenticationPerson() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            return (Person) authentication.getPrincipal();
-        } else {
-            throw new PersonAuthFailedException("Person authentication failed");
-        }
-    }
+	private Person getAuthenticationPerson() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication != null && authentication.isAuthenticated()) {
+			return (Person) authentication.getPrincipal();
+		} else {
+			throw new PersonAuthFailedException("Person authentication failed");
+		}
+	}
 }

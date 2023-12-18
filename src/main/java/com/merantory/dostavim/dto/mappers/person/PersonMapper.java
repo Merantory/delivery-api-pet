@@ -3,7 +3,6 @@ package com.merantory.dostavim.dto.mappers.person;
 import com.merantory.dostavim.dto.impl.person.ChangePersonRoleDto;
 import com.merantory.dostavim.dto.impl.person.PersonDto;
 import com.merantory.dostavim.dto.impl.person.SignUpPersonDto;
-import com.merantory.dostavim.dto.impl.person.UpdatePersonInfoDto;
 import com.merantory.dostavim.model.Person;
 import org.springframework.stereotype.Component;
 

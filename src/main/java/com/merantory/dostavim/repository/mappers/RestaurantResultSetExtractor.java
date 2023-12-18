@@ -1,6 +1,9 @@
 package com.merantory.dostavim.repository.mappers;
 
-import com.merantory.dostavim.model.*;
+import com.merantory.dostavim.model.Category;
+import com.merantory.dostavim.model.Product;
+import com.merantory.dostavim.model.ProductRestaurant;
+import com.merantory.dostavim.model.Restaurant;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 

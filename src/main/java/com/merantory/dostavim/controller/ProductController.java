@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
@@ -53,11 +52,9 @@ public class ProductController {
             description = "Возвращает товар, соответствующий идентификатору.",
             tags = {"get_method_endpoints"}
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
-    })
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProduct(@PathVariable("id") @Positive Long id) {
         Optional<Product> productOptional = productService.getProduct(id);
@@ -84,11 +81,9 @@ public class ProductController {
                             required = false, style = ParameterStyle.SIMPLE)
             }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
-    })
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     @GetMapping
     public ResponseEntity<List<ProductDto>> getProducts(@RequestParam(value = "restaurant_id") Optional<Long> restaurantIdOptional,
                                                         @RequestParam(value = "limit") Optional<Integer> limitOptional,
@@ -120,12 +115,10 @@ public class ProductController {
             summary = "Доступен только администраторам.",
             tags = {"post_method_endpoints"}
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
-    })
+    @ApiResponse(responseCode = "201")
+    @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
     @SecurityRequirement(name = "JWT Bearer Authentication")
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody CreateProductDto createProductDto) {
@@ -140,13 +133,11 @@ public class ProductController {
             summary = "Доступен только администраторам.",
             tags = {"patch_method_endpoints"}
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
-    })
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     @SecurityRequirement(name = "JWT Bearer Authentication")
     @PatchMapping("/{id}/edit")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") @Positive Long id,
@@ -164,13 +155,11 @@ public class ProductController {
             summary = "Доступен только администраторам.",
             tags = {"delete_method_endpoints"}
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
-    })
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     @SecurityRequirement(name = "JWT Bearer Authentication")
     @DeleteMapping("/{id}")
     public ResponseEntity<ProductDto> deleteProduct(@PathVariable("id") @Positive Long id) {
