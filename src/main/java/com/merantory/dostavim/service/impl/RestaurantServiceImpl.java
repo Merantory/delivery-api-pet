@@ -82,6 +82,11 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Transactional
     public Restaurant update(Restaurant restaurant) {
         log.info("Trying to update restaurant with id={} on new data={}", restaurant.getId(), restaurant);
+        if (!isExistRestaurant(restaurant)) {
+            log.info("Restaurant with id={} not found", restaurant.getId());
+            throw new RestaurantNotFoundException(String.format("Restaurant with id %d not found.",
+                    restaurant.getId()));
+        }
         restaurant = restaurantRepository.update(restaurant);
         log.info("Restaurant has been updated: {}", restaurant);
         return restaurant;
