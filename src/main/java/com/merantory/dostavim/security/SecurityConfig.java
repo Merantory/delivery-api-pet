@@ -2,6 +2,7 @@ package com.merantory.dostavim.security;
 
 import com.merantory.dostavim.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,6 +20,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final PersonService personService;
     private final JwtFilter jwtFilter;
+    @Value("${ROLE_ADMIN}")
+    private static String ROLE_ADMIN;
 
     @Autowired
     public SecurityConfig(PersonService personService, JwtFilter jwtFilter) {
@@ -37,12 +40,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf((csrf) -> csrf.disable())
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(HttpMethod.GET, "/orders/all").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/restaurants/{id}/edit", "/products/{id}/edit", "/users/change_role").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/restaurants/{id}", "/products/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/categories", "/restaurants", "/restaurants/add_product", "/products").hasRole("ADMIN")
+        http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.GET, "/orders/all").hasRole(ROLE_ADMIN)
+                        .requestMatchers(HttpMethod.PATCH, "/restaurants/{id}/edit", "/products/{id}/edit", "/users/change_role").hasRole(ROLE_ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, "/restaurants/{id}", "/products/{id}").hasRole(ROLE_ADMIN)
+                        .requestMatchers(HttpMethod.POST, "/categories", "/restaurants", "/restaurants/add_product", "/products").hasRole(ROLE_ADMIN)
                         .requestMatchers(HttpMethod.PATCH, "/users/update_info").authenticated()
                         .requestMatchers(HttpMethod.GET, "/orders", "/orders/{id}").authenticated()
                         .requestMatchers(HttpMethod.POST, "/orders", "/comments").authenticated()
@@ -51,7 +54,7 @@ public class SecurityConfig {
                 )
                 .authenticationManager(authenticationManager(http))
                 .httpBasic(Customizer.withDefaults())
-                .sessionManagement((sessionMan) -> sessionMan.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(sessionMan -> sessionMan.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
