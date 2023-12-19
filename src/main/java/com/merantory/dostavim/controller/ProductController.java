@@ -50,7 +50,11 @@ public class ProductController {
 
     @Operation(
             description = "Возвращает товар, соответствующий идентификатору.",
-            tags = {"get_method_endpoints"}
+            parameters = {
+                    @Parameter(name = "id", in = ParameterIn.PATH, description =
+                            "Идентификатор товара, информацию о котором нужно вернуть.",
+                            required = true, style = ParameterStyle.SIMPLE)
+            }
     )
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -65,7 +69,6 @@ public class ProductController {
     @Operation(
             description = "Возвращает массив всех товаров в ресторане с переданным идентификатором, " +
                     "если идентификатор не передан, возвращаются все товары в системе.",
-            tags = {"get_method_endpoints"},
             parameters = {
                     @Parameter(name = "limit", in = ParameterIn.QUERY, description =
                             "Максимальное количество товаров в выдаче. " +
@@ -76,7 +79,7 @@ public class ProductController {
                                     "Если параметр не передан, то значение по умолчанию равно 0.",
                             required = false, style = ParameterStyle.SIMPLE),
                     @Parameter(name = "restaurant_id", in = ParameterIn.QUERY, description =
-                            "Идентефикатор ресторана, товары которого необходимо получить. " +
+                            "Идентификатор ресторана, товары которого необходимо получить. " +
                                     "Если параметр не передан, возвращаются товары всех ресторанов.",
                             required = false, style = ParameterStyle.SIMPLE)
             }
@@ -112,8 +115,7 @@ public class ProductController {
 
     @Operation(
             description = "Создание товара в системе.",
-            summary = "Доступен только администраторам.",
-            tags = {"post_method_endpoints"}
+            summary = "Доступен только администраторам."
     )
     @ApiResponse(responseCode = "201")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -130,8 +132,7 @@ public class ProductController {
 
     @Operation(
             description = "Обновляет информация о товаре, с соответствующим идентификатором.",
-            summary = "Доступен только администраторам.",
-            tags = {"patch_method_endpoints"}
+            summary = "Доступен только администраторам."
     )
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -152,8 +153,7 @@ public class ProductController {
 
     @Operation(
             description = "Удаляет продукт, соответствующим идентификатором из системы.",
-            summary = "Доступен только администраторам.",
-            tags = {"delete_method_endpoints"}
+            summary = "Доступен только администраторам."
     )
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})

@@ -53,7 +53,6 @@ public class PersonController {
 
 	@Operation(
 			description = "Возвращает массив пользователей.",
-			tags = {"get_method_endpoints"},
 			parameters = {
 					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
 							"Максимальное количество пользователей в выдаче. " +
@@ -84,13 +83,17 @@ public class PersonController {
 
 	@Operation(
 			description = "Возвращает пользователя, соответствующего идентификатору",
-			tags = {"get_method_endpoints"}
+			parameters = {
+					@Parameter(name = "id", in = ParameterIn.PATH, description =
+							"Идентификатор пользователя, информацию о котором необходимо вернуть.",
+							required = true, style = ParameterStyle.SIMPLE)
+			}
 	)
 	@ApiResponse(responseCode = "200")
 	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
 	@ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
 	@GetMapping("/{id}")
-	public ResponseEntity<PersonDto> getPersons(@PathVariable @Positive Long id) {
+	public ResponseEntity<PersonDto> getPerson(@PathVariable("id") @Positive Long id) {
 		Optional<Person> personOptional = personService.getPerson(id);
 		if (personOptional.isEmpty()) throw new PersonNotFoundException();
 		return new ResponseEntity<>(personMapper.toPersonDto(personOptional.get()), HttpStatus.OK);
@@ -98,8 +101,7 @@ public class PersonController {
 
 	@Operation(
 			description = "Меняет роль пользователя.",
-			summary = "Доступен только администраторам.",
-			tags = {"get_method_endpoints"}
+			summary = "Доступен только администраторам."
 	)
 	@ApiResponse(responseCode = "200")
 	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -116,8 +118,7 @@ public class PersonController {
 
 	@Operation(
 			description = "Обновление информации пользователя.",
-			summary = "Доступен только авторизированным пользователям или администраторам.",
-			tags = {"patch_method_endpoints"}
+			summary = "Доступен только авторизированным пользователям или администраторам."
 	)
 	@ApiResponse(responseCode = "200",
 			content = {@Content(schema = @Schema(implementation = PersonDto.class),

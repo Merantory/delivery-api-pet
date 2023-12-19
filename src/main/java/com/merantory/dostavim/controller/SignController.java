@@ -32,7 +32,7 @@ import java.util.Map;
 
 @Tags(
         value = {
-                @Tag(name = "sign-controller", description = "API для работы с регистрацией")
+                @Tag(name = "sign-controller", description = "API для работы с регистрацией и авторизацией")
         }
 )
 @RestController
@@ -57,8 +57,7 @@ public class SignController {
 
     @Operation(
             description = "Авторизация пользователя в системе с возвращением JWT токена.",
-            summary = "Доступен только не авторизированным пользователям.",
-            tags = {"post_method_endpoints"}
+            summary = "Доступен только не авторизированным пользователям."
     )
     @ApiResponse(responseCode = "200",
             content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))})
@@ -81,8 +80,7 @@ public class SignController {
 
     @Operation(
             description = "Регистрация пользователя в системе с возвращением JWT токена.",
-            summary = "Доступен только не авторизированным пользователям.",
-            tags = {"post_method_endpoints"}
+            summary = "Доступен только не авторизированным пользователям."
     )
     @ApiResponse(responseCode = "201",
             content = {@Content(schema = @Schema(type = "object", example = "{\"jwt_token\":\"value\"}"))})

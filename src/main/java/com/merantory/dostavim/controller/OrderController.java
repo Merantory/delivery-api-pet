@@ -53,9 +53,13 @@ public class OrderController {
 	}
 
 	@Operation(
-			description = "Возвращает заказ, соответствующим идентификатором.",
+			description = "Возвращает заказ, с соответствующим идентификатором.",
 			summary = "Доступен только администраторам.",
-			tags = {"get_method_endpoints"}
+			parameters = {
+					@Parameter(name = "id", in = ParameterIn.PATH, description =
+							"Идентификатор заказа, информацию о котором необходимо вернуть.",
+							required = true, style = ParameterStyle.SIMPLE)
+			}
 	)
 	@ApiResponse(responseCode = "200")
 	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -64,7 +68,7 @@ public class OrderController {
 	@ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
 	@SecurityRequirement(name = "JWT Bearer Authentication")
 	@GetMapping("/{id}")
-	public ResponseEntity<OrderDto> getOrder(@PathVariable @Positive Long id) {
+	public ResponseEntity<OrderDto> getOrder(@PathVariable("id") @Positive Long id) {
 		Person person = getAuthenticationPerson();
 
 		Optional<Order> orderOptional = orderService.getOrder(id);
@@ -83,7 +87,6 @@ public class OrderController {
 	@Operation(
 			description = "Возвращает массив всех заказов в системе.",
 			summary = "Доступен только администраторам.",
-			tags = {"get_method_endpoints"},
 			parameters = {
 					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
 							"Максимальное количество заказов в выдаче. " +
@@ -124,7 +127,6 @@ public class OrderController {
 	@Operation(
 			description = "Возвращает массив заказов авторизированного пользователя.",
 			summary = "Доступен только авторизированным пользователям и администраторам.",
-			tags = {"get_method_endpoints"},
 			parameters = {
 					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
 							"Максимальное количество заказов в выдаче. " +
@@ -164,8 +166,7 @@ public class OrderController {
 
 	@Operation(
 			description = "Создание заказа для текущего авторизированного пользователя.",
-			summary = "Доступен только авторизированным пользователям или администраторам.",
-			tags = {"post_method_endpoints"}
+			summary = "Доступен только авторизированным пользователям или администраторам."
 	)
 	@ApiResponse(responseCode = "201")
 	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})

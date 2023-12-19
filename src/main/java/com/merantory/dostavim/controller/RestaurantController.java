@@ -55,18 +55,33 @@ public class RestaurantController {
 
     @Operation(
             description = "Возвращает ресторан, соответствующим идентификатором.",
-            tags = {"get_method_endpoints"}
+            parameters = {
+                    @Parameter(name = "id", in = ParameterIn.PATH, description =
+                            "Идентификатор ресторана, информацию о котором нужно вернуть.",
+                            required = true, style = ParameterStyle.SIMPLE)
+            }
     )
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
     @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     @GetMapping("/{id}")
-    public ResponseEntity<RestaurantDto> getRestaurant(@PathVariable @Positive Long id) {
+    public ResponseEntity<RestaurantDto> getRestaurant(@PathVariable("id") @Positive Long id) {
         Optional<Restaurant> restaurantOptional = restaurantService.getRestaurant(id);
         if (restaurantOptional.isEmpty()) throw new RestaurantNotFoundException();
         return new ResponseEntity<>(restaurantMapper.toRestaurantDto(restaurantOptional.get()), HttpStatus.OK);
     }
 
+    @Operation(
+            description = "Возвращает ресторан, соответствующим идентификатором. С списком продуктов.",
+            parameters = {
+                    @Parameter(name = "id", in = ParameterIn.PATH, description =
+                            "Идентификатор ресторана, информацию о котором нужно вернуть.",
+                            required = true, style = ParameterStyle.SIMPLE)
+            }
+    )
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
     @GetMapping("/{id}/products")
     public ResponseEntity<RestaurantDto> getRestaurantWithProducts(@PathVariable Long id) {
         Optional<Restaurant> restaurantOptional = restaurantService.getRestaurantWithProducts(id);
@@ -76,7 +91,6 @@ public class RestaurantController {
 
     @Operation(
             description = "Возвращает ресторан, с соответствующим идентификатором.",
-            tags = {"get_method_endpoints"},
             parameters = {
                     @Parameter(name = "limit", in = ParameterIn.QUERY, description =
                             "Максимальное количество ресторанов в выдаче. " +
@@ -110,8 +124,7 @@ public class RestaurantController {
             description = "Добавляет продукты в определенном количестве в ресторан, с соответствующим идентификатором. " +
                     "Если данных продуктов не существовало в ресторане до этого, они создаются с указанным количеством, " +
                     "иначе количество имеющихся продуктов в ресторане увеличится на указанное в запросе.",
-            summary = "Доступен только администраторам.",
-            tags = {"post_method_endpoints"}
+            summary = "Доступен только администраторам."
     )
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -129,8 +142,7 @@ public class RestaurantController {
 
     @Operation(
             description = "Создает ресторан в системе.",
-            summary = "Доступен только администраторам.",
-            tags = {"post_method_endpoints"}
+            summary = "Доступен только администраторам."
     )
     @ApiResponse(responseCode = "201")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -146,8 +158,7 @@ public class RestaurantController {
 
     @Operation(
             description = "Обновляет информация о ресторане, с соответствующим идентификатором.",
-            summary = "Доступен только администраторам.",
-            tags = {"patch_method_endpoints"}
+            summary = "Доступен только администраторам."
     )
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -166,8 +177,7 @@ public class RestaurantController {
 
     @Operation(
             description = "Удаляет ресторан, соответствующий идентификатору из системы.",
-            summary = "Доступен только администраторам.",
-            tags = {"delete_method_endpoints"}
+            summary = "Доступен только администраторам."
     )
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})

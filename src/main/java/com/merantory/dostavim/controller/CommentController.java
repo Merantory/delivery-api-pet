@@ -57,8 +57,7 @@ public class CommentController {
 	}
 
 	@Operation(
-			description = "Возвращает комментарий, соответствующий идентификатору.",
-			tags = {"get_method_endpoints"}
+			description = "Возвращает комментарий, соответствующий идентификатору."
 	)
 	@ApiResponse(responseCode = "200")
 	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
@@ -74,7 +73,6 @@ public class CommentController {
 
 	@Operation(
 			description = "Возвращает массив всех комментариев в системе.",
-			tags = {"get_method_endpoints"},
 			parameters = {
 					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
 							"Максимальное количество комментариев в выдаче. " +
@@ -104,7 +102,6 @@ public class CommentController {
 
 	@Operation(
 			description = "Возвращает массив всех комментариев к товару, с соответствующим идентификатором в системе.",
-			tags = {"get_method_endpoints"},
 			parameters = {
 					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
 							"Максимальное количество комментариев в выдаче. " +
@@ -114,7 +111,7 @@ public class CommentController {
 							"Количество комментариев, которое нужно пропустить для отображения текущей страницы. " +
 									"Если параметр не передан, то значение по умолчанию равно 0.",
 							required = false, style = ParameterStyle.SIMPLE),
-					@Parameter(name = "product_id", in = ParameterIn.QUERY, description =
+					@Parameter(name = "product_id", in = ParameterIn.PATH, description =
 							"Идентификатор товара, комментарии которого необходимо получить.",
 							required = true, style = ParameterStyle.SIMPLE)
 			}
@@ -139,7 +136,6 @@ public class CommentController {
 
 	@Operation(
 			description = "Возвращает массив всех комментариев пользователя, с соответствующим идентификатором в системе.",
-			tags = {"get_method_endpoints"},
 			parameters = {
 					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
 							"Максимальное количество комментариев в выдаче. " +
@@ -149,7 +145,7 @@ public class CommentController {
 							"Количество комментариев, которое нужно пропустить для отображения текущей страницы. " +
 									"Если параметр не передан, то значение по умолчанию равно 0.",
 							required = false, style = ParameterStyle.SIMPLE),
-					@Parameter(name = "person", in = ParameterIn.QUERY, description =
+					@Parameter(name = "person_id", in = ParameterIn.PATH, description =
 							"Идентификатор пользователя, комментарии которого необходимо получить.",
 							required = true, style = ParameterStyle.SIMPLE)
 			}
@@ -174,8 +170,7 @@ public class CommentController {
 
 	@Operation(
 			description = "Создание комментария от лица текущего авторизированного пользователя.",
-			summary = "Доступен только авторизированным пользователям или администраторам.",
-			tags = {"post_method_endpoints"}
+			summary = "Доступен только авторизированным пользователям или администраторам."
 	)
 	@ApiResponse(responseCode = "201")
 	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})

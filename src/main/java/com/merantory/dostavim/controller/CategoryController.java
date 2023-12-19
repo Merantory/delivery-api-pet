@@ -47,7 +47,6 @@ public class CategoryController {
 
 	@Operation(
 			description = "Возвращает массив всех категорий в системе.",
-			tags = {"get_method_endpoints"},
 			parameters = {
 					@Parameter(name = "limit", in = ParameterIn.QUERY, description =
 							"Максимальное количество категорий в выдаче. " +
@@ -78,8 +77,7 @@ public class CategoryController {
 
 	@Operation(
 			description = "Создание категории в системе.",
-			summary = "Доступен только администраторам.",
-			tags = {"post_method_endpoints"}
+			summary = "Доступен только администраторам."
 	)
 	@ApiResponse(responseCode = "201")
 	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
