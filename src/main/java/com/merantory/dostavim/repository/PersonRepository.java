@@ -12,6 +12,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,10 +77,10 @@ public class PersonRepository {
     }
 
     public Boolean delete(Long id) {
-        String sqlQuery = "DELETE FROM person WHERE id=?";
+        String sqlQuery = "UPDATE person SET deleted_at = ? WHERE id=?";
         Boolean isDeleted = false;
         try {
-            isDeleted = (jdbcTemplate.update(sqlQuery, id)) != 0;
+            isDeleted = (jdbcTemplate.update(sqlQuery, Instant.now(), id)) != 0;
         } catch (DataAccessException exception) {
             throw new PersonDeleteFailedException();
         }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 @Component
 public class PersonRowMapper implements RowMapper<Person> {
@@ -19,6 +21,11 @@ public class PersonRowMapper implements RowMapper<Person> {
         person.setPhoneNumber(rs.getString("phone_number"));
         person.setAddress(rs.getString("address"));
         person.setRole(rs.getString("role"));
+        try {
+            person.setDeletedAt((rs.getTimestamp("deleted_at",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                    .toInstant()));
+        } catch (Exception ignore) {}
 
         return person;
     }

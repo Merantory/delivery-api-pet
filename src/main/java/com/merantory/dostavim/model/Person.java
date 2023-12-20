@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -19,6 +20,7 @@ public class Person implements UserDetails {
     private String phoneNumber;
     private String address;
     private String role;
+    private Instant deletedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -47,6 +49,6 @@ public class Person implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return deletedAt == null;
     }
 }

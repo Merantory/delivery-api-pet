@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 11
+      author: merantory
+      changes:
+        - tagDatabase:
+            tag: personDeletedAtColumnTag
+        - sqlFile:
+            dbms: "postgresql"
+            relativeToChangelogFile: true
+            path: sql/add_column_deleted_at_to_person_table.sql
+
+      rollback:
+        - sqlFile:
+            dbms: "postgresql"
+            relativeToChangelogFile: true
+            path: sql/rollback_column_deleted_at_person_table.sql

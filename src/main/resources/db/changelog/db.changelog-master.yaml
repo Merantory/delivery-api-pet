@@ -32,3 +32,6 @@ databaseChangeLog:
   - include:
       relativeToChangelogFile: true
       file: changeset/comment_table.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: changeset/add_column_deleted_at_to_person_table.yaml
