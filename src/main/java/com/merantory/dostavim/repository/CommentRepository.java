@@ -1,6 +1,7 @@
 package com.merantory.dostavim.repository;
 
 import com.merantory.dostavim.exception.CommentCreationFailedException;
+import com.merantory.dostavim.exception.CommentDeleteFailedException;
 import com.merantory.dostavim.model.Comment;
 import com.merantory.dostavim.repository.mappers.CommentRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,16 @@ public class CommentRepository {
             return comment;
         } catch (DataAccessException exception) {
             throw new CommentCreationFailedException();
+        }
+    }
+
+    public Boolean delete(Long id) {
+        String sqlQuery = "DELETE FROM comment WHERE comment_id=?";
+        try {
+            Boolean isDeleted = (jdbcTemplate.update(sqlQuery, id)) != 0;
+            return isDeleted;
+        } catch (DataAccessException exception) {
+            throw new CommentDeleteFailedException();
         }
     }
 }

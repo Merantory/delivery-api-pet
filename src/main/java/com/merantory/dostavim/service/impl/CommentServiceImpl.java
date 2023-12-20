@@ -1,6 +1,7 @@
 package com.merantory.dostavim.service.impl;
 
 import com.merantory.dostavim.exception.CommentAlreadyExistException;
+import com.merantory.dostavim.exception.CommentNotFoundException;
 import com.merantory.dostavim.exception.PersonNotFoundException;
 import com.merantory.dostavim.exception.ProductNotFoundException;
 import com.merantory.dostavim.model.Comment;
@@ -89,6 +90,20 @@ public class CommentServiceImpl implements CommentService {
         comment = commentRepository.save(comment);
         log.info("Comment has been created: {}", comment);
         return comment;
+    }
+
+    @Override
+    @Transactional
+    public Comment delete(Long id) {
+        log.info("Trying to delete comment with id={}", id);
+        Optional<Comment> commentOptional = commentRepository.getComment(id);
+        if (commentOptional.isEmpty()) {
+            log.info("Comment with id={} not found", id);
+            throw new CommentNotFoundException(String.format("Product with id %d not found.", id));
+        }
+        Boolean isDeleted = commentRepository.delete(id);
+        log.info("Comment has been deleted with data={}", commentOptional.get());
+        return commentOptional.get();
     }
 
     private Boolean isExistProduct(Product product) {

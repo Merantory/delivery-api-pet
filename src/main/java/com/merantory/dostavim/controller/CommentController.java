@@ -4,6 +4,7 @@ import com.merantory.dostavim.dto.impl.comment.CommentDto;
 import com.merantory.dostavim.dto.impl.comment.CreateCommentDto;
 import com.merantory.dostavim.dto.mappers.comment.CommentMapper;
 import com.merantory.dostavim.exception.CommentNotFoundException;
+import com.merantory.dostavim.exception.ForbiddenException;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
 import com.merantory.dostavim.model.Comment;
@@ -185,5 +186,29 @@ public class CommentController {
 		comment.setCreator(creator);
 		comment = commentService.create(comment);
 		return new ResponseEntity<>(commentMapper.toCommentDto(comment), HttpStatus.CREATED);
+	}
+
+	@Operation(
+			description = "Удаление комментария, с соответствующим идентификатором.",
+			summary = "Доступен только авторизированным пользователям или администраторам."
+	)
+	@ApiResponse(responseCode = "201")
+	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
+	@SecurityRequirement(name = "JWT Bearer Authentication")
+	@DeleteMapping("/{id}")
+	public ResponseEntity<CommentDto> deleteComment(@PathVariable("id") @Positive Long id) {
+		Optional<Comment> commentOptional = commentService.getComment(id);
+		Comment comment = commentOptional.orElseThrow(CommentNotFoundException::new);
+
+		Person authPerson = authenticationHelper.getAuthenticationPerson();
+		if (!authPerson.getRole().equals("ROLE_ADMIN") && !comment.getCreator().getId().equals(authPerson.getId())) {
+			throw new ForbiddenException();
+		}
+
+		comment = commentService.delete(id);
+		return new ResponseEntity<>(commentMapper.toCommentDto(comment), HttpStatus.OK);
 	}
 }

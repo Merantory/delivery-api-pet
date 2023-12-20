@@ -98,12 +98,13 @@ public class ProductRepository {
     }
 
     public Boolean delete(Long id) {
-        String sqlQuery = "DELETE FROM \"order\" WHERE id IN (SELECT order_id FROM order_product WHERE product_id=?); " +
+        String sqlQuery = "DELETE FROM comment WHERE product_id = ?; " +
+                "DELETE FROM \"order\" WHERE id IN (SELECT order_id FROM order_product WHERE product_id=?); " +
                 "DELETE FROM order_product WHERE product_id=?; " +
                 "DELETE FROM product_restaurant WHERE product_id=?; " +
                 "DELETE FROM product WHERE id=?";
         try {
-            Boolean isDeleted =  (jdbcTemplate.update(sqlQuery, id, id, id, id)) != 0;
+            Boolean isDeleted = (jdbcTemplate.update(sqlQuery, id, id, id, id, id)) != 0;
             return isDeleted;
         } catch (DataAccessException exception) {
             throw new ProductDeleteFailedException();

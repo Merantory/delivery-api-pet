@@ -11,4 +11,5 @@ public interface CommentService {
     List<Comment> getProductComments(Long productId, Integer limit, Integer offset);
     List<Comment> getPersonComments(Long personId, Integer limit, Integer offset);
     Comment create(Comment comment);
+    Comment delete(Long id);
 }
