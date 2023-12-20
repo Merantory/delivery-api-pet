@@ -33,6 +33,7 @@ HELP.md
 
 # idea
 .idea
+dostavim.iml
 
 #Properties files
 /src/main/resources/application-dev.properties

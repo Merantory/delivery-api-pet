@@ -4,6 +4,7 @@ import com.merantory.dostavim.dto.impl.person.ChangePersonRoleDto;
 import com.merantory.dostavim.dto.impl.person.PersonDto;
 import com.merantory.dostavim.dto.impl.person.UpdatePersonInfoDto;
 import com.merantory.dostavim.dto.mappers.person.PersonMapper;
+import com.merantory.dostavim.exception.ForbiddenException;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
 import com.merantory.dostavim.exception.PersonNotFoundException;
@@ -134,5 +135,27 @@ public class PersonController {
 		authPerson.setAddress(updatePersonInfoDto.getAddress());
 		Person updatedPerson = personService.update(authPerson);
 		return new ResponseEntity<>(personMapper.toPersonDto(updatedPerson), HttpStatus.OK);
+	}
+
+	@Operation(
+			description = "Удаление пользователя.",
+			summary = "Доступен только администраторам."
+	)
+	@ApiResponse(responseCode = "200",
+			content = {@Content(schema = @Schema(implementation = PersonDto.class),
+					mediaType = "application/json")})
+	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
+	@SecurityRequirement(name = "JWT Bearer Authentication")
+	@DeleteMapping("/{id}")
+	public ResponseEntity<PersonDto> deletePerson(@PathVariable("id") @Positive Long id) {
+		Person authPerson = authenticationHelper.getAuthenticationPerson();
+		if (!authPerson.getRole().equals("ROLE_ADMIN")) {
+			throw new ForbiddenException();
+		}
+		Person deletedPerson = personService.delete(id);
+		return new ResponseEntity<>(personMapper.toPersonDto(deletedPerson), HttpStatus.OK);
 	}
 }
