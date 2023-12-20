@@ -6,10 +6,10 @@ import com.merantory.dostavim.dto.impl.person.UpdatePersonInfoDto;
 import com.merantory.dostavim.dto.mappers.person.PersonMapper;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
-import com.merantory.dostavim.exception.PersonAuthFailedException;
 import com.merantory.dostavim.exception.PersonNotFoundException;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.service.PersonService;
+import com.merantory.dostavim.util.security.AuthenticationHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -25,8 +25,6 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,11 +42,14 @@ import java.util.Optional;
 public class PersonController {
 	private final PersonService personService;
 	private final PersonMapper personMapper;
+	private final AuthenticationHelper authenticationHelper;
 
 	@Autowired
-	public PersonController(PersonService personService, PersonMapper personMapper) {
+	public PersonController(PersonService personService, PersonMapper personMapper,
+							AuthenticationHelper authenticationHelper) {
 		this.personService = personService;
 		this.personMapper = personMapper;
+		this.authenticationHelper = authenticationHelper;
 	}
 
 	@Operation(
@@ -128,19 +129,10 @@ public class PersonController {
 	@SecurityRequirement(name = "JWT Bearer Authentication")
 	@PatchMapping("/update_info")
 	public ResponseEntity<PersonDto> updatePersonInfo(@Valid @RequestBody UpdatePersonInfoDto updatePersonInfoDto) {
-		Person authPerson = getAuthenticationPerson();
+		Person authPerson = authenticationHelper.getAuthenticationPerson();
 		authPerson.setName(updatePersonInfoDto.getName());
 		authPerson.setAddress(updatePersonInfoDto.getAddress());
 		Person updatedPerson = personService.update(authPerson);
 		return new ResponseEntity<>(personMapper.toPersonDto(updatedPerson), HttpStatus.OK);
-	}
-
-	private Person getAuthenticationPerson() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && authentication.isAuthenticated()) {
-			return (Person) authentication.getPrincipal();
-		} else {
-			throw new PersonAuthFailedException("Person authentication failed");
-		}
 	}
 }

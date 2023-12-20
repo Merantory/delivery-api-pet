@@ -21,7 +21,7 @@ public class SecurityConfig {
     private final PersonService personService;
     private final JwtFilter jwtFilter;
     @Value("${ROLE_ADMIN}")
-    private static String ROLE_ADMIN;
+    private String ROLE_ADMIN;
 
     @Autowired
     public SecurityConfig(PersonService personService, JwtFilter jwtFilter) {

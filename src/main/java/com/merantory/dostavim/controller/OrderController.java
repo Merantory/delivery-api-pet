@@ -3,10 +3,14 @@ package com.merantory.dostavim.controller;
 import com.merantory.dostavim.dto.impl.order.CreateOrderDto;
 import com.merantory.dostavim.dto.impl.order.OrderDto;
 import com.merantory.dostavim.dto.mappers.order.OrderMapper;
-import com.merantory.dostavim.exception.*;
+import com.merantory.dostavim.exception.ForbiddenException;
+import com.merantory.dostavim.exception.IllegalLimitArgumentException;
+import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
+import com.merantory.dostavim.exception.OrderNotFoundException;
 import com.merantory.dostavim.model.Order;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.service.OrderService;
+import com.merantory.dostavim.util.security.AuthenticationHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -22,8 +26,6 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,15 +43,18 @@ import java.util.Optional;
 public class OrderController {
 	private final OrderService orderService;
 	private final OrderMapper orderMapper;
+	private final AuthenticationHelper authenticationHelper;
 	private static final String INVALID_LIMIT_MESSAGE =
 			"Invalid limit argument value. Its should be positive. Received: %d";
 	private static final String INVALID_OFFSET_MESSAGE =
 			"Invalid offset argument value. Its should be not negative. Received: %d";
 
 	@Autowired
-	public OrderController(OrderService orderService, OrderMapper orderMapper) {
+	public OrderController(OrderService orderService, OrderMapper orderMapper,
+						   AuthenticationHelper authenticationHelper) {
 		this.orderService = orderService;
 		this.orderMapper = orderMapper;
+		this.authenticationHelper = authenticationHelper;
 	}
 
 	@Operation(
@@ -69,7 +74,7 @@ public class OrderController {
 	@SecurityRequirement(name = "JWT Bearer Authentication")
 	@GetMapping("/{id}")
 	public ResponseEntity<OrderDto> getOrder(@PathVariable("id") @Positive Long id) {
-		Person person = getAuthenticationPerson();
+		Person person = authenticationHelper.getAuthenticationPerson();
 
 		Optional<Order> orderOptional = orderService.getOrder(id);
 
@@ -158,7 +163,7 @@ public class OrderController {
 				String.format(INVALID_LIMIT_MESSAGE, limit));
 		if (offset < 0) throw new IllegalOffsetArgumentException(
 				String.format(INVALID_OFFSET_MESSAGE, offset));
-		Long ordersOwnerId = getAuthenticationPerson().getId();
+		Long ordersOwnerId = authenticationHelper.getAuthenticationPerson().getId();
 
 		return new ResponseEntity<>(orderService.getPersonOrders(ordersOwnerId, limit, offset, detailed).stream()
 				.map(orderMapper::toOrderDto).toList(), HttpStatus.OK);
@@ -174,19 +179,10 @@ public class OrderController {
 	@SecurityRequirement(name = "JWT Bearer Authentication")
 	@PostMapping
 	public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody CreateOrderDto createOrderDto) {
-		Person creator = getAuthenticationPerson();
+		Person creator = authenticationHelper.getAuthenticationPerson();
 		Order order = orderMapper.toOrder(createOrderDto);
 		order.setPerson(creator);
 		Order createdOrder = orderService.create(order);
 		return new ResponseEntity<>(orderMapper.toOrderDto(createdOrder), HttpStatus.CREATED);
-	}
-
-	private Person getAuthenticationPerson() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && authentication.isAuthenticated()) {
-			return (Person) authentication.getPrincipal();
-		} else {
-			throw new PersonAuthFailedException("Person authentication failed");
-		}
 	}
 }

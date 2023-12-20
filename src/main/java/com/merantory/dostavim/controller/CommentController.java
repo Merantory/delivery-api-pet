@@ -6,10 +6,10 @@ import com.merantory.dostavim.dto.mappers.comment.CommentMapper;
 import com.merantory.dostavim.exception.CommentNotFoundException;
 import com.merantory.dostavim.exception.IllegalLimitArgumentException;
 import com.merantory.dostavim.exception.IllegalOffsetArgumentException;
-import com.merantory.dostavim.exception.PersonAuthFailedException;
 import com.merantory.dostavim.model.Comment;
 import com.merantory.dostavim.model.Person;
 import com.merantory.dostavim.service.CommentService;
+import com.merantory.dostavim.util.security.AuthenticationHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -25,9 +25,6 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,15 +42,18 @@ import java.util.Optional;
 public class CommentController {
 	private final CommentService commentService;
 	private final CommentMapper commentMapper;
+	private final AuthenticationHelper authenticationHelper;
 	private static final String INVALID_LIMIT_MESSAGE =
 			"Invalid limit argument value. Its should be positive. Received: %d";
 	private static final String INVALID_OFFSET_MESSAGE =
 			"Invalid offset argument value. Its should be not negative. Received: %d";
 
 	@Autowired
-	public CommentController(CommentService commentService, CommentMapper commentMapper) {
+	public CommentController(CommentService commentService, CommentMapper commentMapper,
+							 AuthenticationHelper authenticationHelper) {
 		this.commentService = commentService;
 		this.commentMapper = commentMapper;
+		this.authenticationHelper = authenticationHelper;
 	}
 
 	@Operation(
@@ -181,18 +181,9 @@ public class CommentController {
 	@PostMapping()
 	public ResponseEntity<CommentDto> createComment(@Valid @RequestBody CreateCommentDto createCommentDto) {
 		Comment comment = commentMapper.toComment(createCommentDto);
-		Person creator = getAuthenticationPerson();
+		Person creator = authenticationHelper.getAuthenticationPerson();
 		comment.setCreator(creator);
 		comment = commentService.create(comment);
 		return new ResponseEntity<>(commentMapper.toCommentDto(comment), HttpStatus.CREATED);
-	}
-
-	private Person getAuthenticationPerson() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
-			return (Person) authentication.getPrincipal();
-		} else {
-			throw new PersonAuthFailedException("Person authentication failed");
-		}
 	}
 }
