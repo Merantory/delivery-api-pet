@@ -43,7 +43,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/orders/all").hasRole(ROLE_ADMIN)
-                        .requestMatchers(HttpMethod.PATCH, "/restaurants/{id}/edit", "/products/{id}/edit", "/users/change_role").hasRole(ROLE_ADMIN)
+                        .requestMatchers(HttpMethod.PATCH, "/restaurants/{id}/edit", "/products/{id}/edit",
+                                "/users/change_role", "/users/update_info/{id}").hasRole(ROLE_ADMIN)
                         .requestMatchers(HttpMethod.DELETE, "/restaurants/{id}", "/products/{id}").hasRole(ROLE_ADMIN)
                         .requestMatchers(HttpMethod.POST, "/categories", "/restaurants", "/restaurants/add_product", "/products").hasRole(ROLE_ADMIN)
                         .requestMatchers(HttpMethod.PATCH, "/users/update_info").authenticated()
