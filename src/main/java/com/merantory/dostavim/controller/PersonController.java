@@ -119,7 +119,7 @@ public class PersonController {
 	}
 
 	@Operation(
-			description = "Обновление информации пользователя.",
+			description = "Обновление информации авторизированного пользователя.",
 			summary = "Доступен только авторизированным пользователям или администраторам."
 	)
 	@ApiResponse(responseCode = "200",
@@ -135,6 +135,27 @@ public class PersonController {
 		authPerson.setAddress(updatePersonInfoDto.getAddress());
 		Person updatedPerson = personService.update(authPerson);
 		return new ResponseEntity<>(personMapper.toPersonDto(updatedPerson), HttpStatus.OK);
+	}
+
+	@Operation(
+			description = "Обновление информации пользователя, с соответствующим идентификатором.",
+			summary = "Доступен только администраторам."
+	)
+	@ApiResponse(responseCode = "200",
+			content = {@Content(schema = @Schema(implementation = PersonDto.class),
+					mediaType = "application/json")})
+	@ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "401", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())})
+	@ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())})
+	@SecurityRequirement(name = "JWT Bearer Authentication")
+	@PatchMapping("/update_info/{id}")
+	public ResponseEntity<PersonDto> updatePersonInfoById(@PathVariable("id") @Positive Long id,
+														  @Valid @RequestBody UpdatePersonInfoDto updatePersonInfoDto) {
+		Person person = personMapper.toPerson(updatePersonInfoDto);
+		person.setId(id);
+		Person updatedPersonInfo = personService.update(person);
+		return new ResponseEntity<>(personMapper.toPersonDto(updatedPersonInfo), HttpStatus.OK);
 	}
 
 	@Operation(

@@ -3,6 +3,7 @@ package com.merantory.dostavim.dto.mappers.person;
 import com.merantory.dostavim.dto.impl.person.ChangePersonRoleDto;
 import com.merantory.dostavim.dto.impl.person.PersonDto;
 import com.merantory.dostavim.dto.impl.person.SignUpPersonDto;
+import com.merantory.dostavim.dto.impl.person.UpdatePersonInfoDto;
 import com.merantory.dostavim.model.Person;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,14 @@ public class PersonMapper {
             personRole = "ROLE_" + personRole;
         }
         person.setRole(personRole);
+
+        return person;
+    }
+
+    public Person toPerson(UpdatePersonInfoDto updatePersonInfoDto) {
+        Person person = new Person();
+        person.setName(updatePersonInfoDto.getName());
+        person.setAddress(updatePersonInfoDto.getAddress());
 
         return person;
     }
