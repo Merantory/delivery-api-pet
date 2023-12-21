@@ -70,6 +70,13 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order create(Order order) {
         log.info("Trying to create order: {}", order);
+        if (order.getPerson().getAddress() == null || order.getPerson().getAddress().isBlank()) {
+            log.info("Failed to create order for person. Person address not received. Person data={}",
+                    order.getPerson());
+            throw new OrderCreationFailedException(
+                    String.format("Before creating order, you should specify address for Person with id %d.",
+                            order.getPerson().getId()));
+        }
         if (!isExistRestaurant(order.getRestaurant())) {
             log.info("Restaurant with id={} not found", order.getRestaurant().getId());
             throw new RestaurantNotFoundException(String.format("Restaurant with id %d not found.",
