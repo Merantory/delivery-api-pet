@@ -1,28 +1,34 @@
-# Курсовая работа по дисциплине "Базы данных"
+# Delivery api (Dostavim)
 
-Материалы для выполнения курсовой работы:
+## Введение
+API доставки продуктов питания
+## Настройки проекта
+1. Настройка подключения к базе данных
 
-* Требования и порядок выполнения &mdash; в личном кабинете
-* Образец технического задания &mdash; в личном кабинете
-* Учебное пособие ("Разработка и развертывание веб-приложения на языке Python") &mdash; [work in progress...](https://github.com/db-course/course-project-manual/blob/master/index.rst)
+   ```
+    spring.datasource.url=jdbc:postgresql://${POSTGRES_SERVER}:${POSTGRES_PORT}/${POSTGRES_DB}
+    spring.datasource.username=${POSTGRES_USER}
+    spring.datasource.password=${POSTGRES_PASSWORD}
+   ```
+2. Секретный ключ JWT токена
 
-Данный репозиторий необходимо форкнуть и использовать для выполнения работы. После внесения первых изменений, необходимо создать пулл-реквест, пометив его как "draft" (черновик). Предполагаемая структура форка:
+   ```
+    jwt_secret=ключ
+   ```
+3. Swagger генератор
+   ```
+    springdoc.swagger-ui.path=
+    springdoc.api-docs.path=
+    openapi.dev-url=
+    openapi.prod-url=
+   ```
 
-    /
-    ├─ app/
-    │  ├─ ...
-    ├─ db/
-    │  ├─ generate.sql
-    │  ├─ ...    
-    ├─ doc/
-    │  ├─ erd.drawio
-    │  ├─ relational.drawio
-    │  ├─ technical_specification.pdf
-    │  ├─ use-case.drawio
-    ├─ .gitignore
-    ├─ myproject.py
-    ├─ README.md
-    ├─ requirements.txt
-    ├─ start.sh
+Упрвлением зависимостей и сборки занимается maven. Подробнее в файле [pom.xml](https://github.com/Merantory/delivery-api-pet/blob/master/pom.xml)
 
-После того, как проект будет полностью завершен, пометку "draft" можно снять.
+## Запуск приложения
+Запуск осуществляется через <code>docker-compose up -d</code>
+
+## Документация проекта
+Документация проекта реализована при помощи Swagger генератора. URL, по которому доступна документация задается в файле application.properties
+
+Дополнительная документация по проекту в виде ТЗ курсового проекта, USE-CASE диаграммы, а также диаграмм базы данных доступна [здесь](https://github.com/Merantory/delivery-api-pet/tree/master/doc)
